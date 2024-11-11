@@ -3,40 +3,46 @@
       "PK": "ROOMS",
       "SK": "2024-11-01",
       "Rooms": [
-        { "Type": "Single", "Beds": 1, "Price": 1000, "Availability": 5, "Bookings": [] },
-        { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 3, "Bookings": [] }
+        {"Type": "Single", "Beds": 1, "Price": 1000, "Availability": 7, "Bookings": [] },
+        { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 10, "Bookings": [] },
+        { "Type": "Suit", "Beds": 2, "Price": 1500, "Availability": 3, "Bookings": [] }
+    
       ]
     },
     {
       "PK": "ROOMS",
       "SK": "2024-11-02",
       "Rooms": [
-        { "Type": "Single", "Beds": 1, "Price": 1000, "Availability": 4, "Bookings": [] },
-        { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 2, "Bookings": [] }
+        {"Type": "Single", "Beds": 1, "Price": 1000, "Availability": 7, "Bookings": [] },
+        { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 10, "Bookings": [] },
+        { "Type": "Suit", "Beds": 2, "Price": 1500, "Availability": 3, "Bookings": [] }
       ]
     },
     {
       "PK": "ROOMS",
       "SK": "2024-11-03",
       "Rooms": [
-        { "Type": "Single", "Beds": 1, "Price": 1000, "Availability": 5, "Bookings": [] },
-        { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 4, "Bookings": [] }
+        {"Type": "Single", "Beds": 1, "Price": 1000, "Availability": 7, "Bookings": [] },
+        { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 10, "Bookings": [] },
+        { "Type": "Suit", "Beds": 2, "Price": 1500, "Availability": 3, "Bookings": [] }
       ]
     },
     {
       "PK": "ROOMS",
       "SK": "2024-11-04",
       "Rooms": [
-        { "Type": "Single", "Beds": 1, "Price": 1000, "Availability": 3, "Bookings": [] },
-        { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 1, "Bookings": [] }
+        {"Type": "Single", "Beds": 1, "Price": 1000, "Availability": 7, "Bookings": [] },
+        { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 10, "Bookings": [] },
+        { "Type": "Suit", "Beds": 2, "Price": 1500, "Availability": 3, "Bookings": [] }
       ]
     },
     {
       "PK": "ROOMS",
       "SK": "2024-11-05",
       "Rooms": [
-        { "Type": "Single", "Beds": 1, "Price": 1000, "Availability": 2, "Bookings": [] },
-        { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 2, "Bookings": [] }
+        {"Type": "Single", "Beds": 1, "Price": 1000, "Availability": 7, "Bookings": [] },
+        { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 10, "Bookings": [] },
+        { "Type": "Suit", "Beds": 2, "Price": 1500, "Availability": 3, "Bookings": [] }
       ]
     },
 
@@ -108,6 +114,5 @@
         ]
     }
       
-      
-  ]
-  
+]
+
