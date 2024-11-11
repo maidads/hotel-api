@@ -1,0 +1,78 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: ktpersonal
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: hotel-api
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-north-1
+  role: ${ssm:/for-class/iam/role}
+
+package:
+  exclude:
+    - node_modules/**
+    - tests/**
+    - docs/**
+    - .git/**
+    - "*.md"
+    - "*.log"
+    - "README.md"
+    - ".env"
+    - .dynamodb/**
+
+
+
+resources:
+  Resources:
+    MyDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: HotelTable
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+
+
+custom:
+  dynamodb:
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true  # Kör DynamoDB i minnet för snabbare utveckling
+      migrate: true   # Skapa tabellen om den inte finns
+      seed: true
+    seed: 
+      domain:
+        sources:
+          - table: HotelTable
+            sources: [./seed-data/hotel-data.json]
+
+
+plugins:
+  - serverless-offline
+  - serverless-dynamodb
+
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - httpApi:
+          path: /
+          method: get
+  addItem:
+    handler: addItem.handler
+    events:
+      - httpApi:
+          path: /items
+          method: post

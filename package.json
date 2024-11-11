@@ -1,0 +1,7 @@
+{
+  "devDependencies": {
+    "aws-sdk": "^2.1692.0",
+    "serverless-dynamodb": "^0.2.55",
+    "serverless-offline": "^14.3.4"
+  }
+}
