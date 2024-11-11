@@ -76,3 +76,37 @@ functions:
       - httpApi:
           path: /items
           method: post
+
+  searchRooms:
+    handler: functions/searchRooms/index.handler
+    events:
+      - http:
+          path: search-rooms
+          method: GET
+          request:
+            parameters:
+              querystrings:
+                guests: true
+                startDate: true
+                endDate: true
+  
+  bookRooms:
+    handler: functions/bookRooms/index.handler
+    events: 
+      - http:
+          path: book-rooms
+          method: POST
+
+  cancel-booking:
+    handler: functions/cancelBooking/index.handler
+    events:
+      - http:
+          path: cancel-booking/{id}
+          method: DELETE
+
+  retrive-bookings:
+    handler: functions/retriveBookings/index.handler
+    events:
+      - http:
+          path: retrive-bookings/
+          method: GET
