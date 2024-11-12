@@ -1,6 +1,6 @@
-const { marshall } = require('@aws-sdk/util-dynamodb');
+const { marshall, unmarshall } = require('@aws-sdk/util-dynamodb');
 const dynamoDb = require('../../config/dynamodb');
-const { TransactWriteItemsCommand, BatchWriteItemCommand } = require("@aws-sdk/client-dynamodb");
+const { TransactWriteItemsCommand, BatchWriteItemCommand, PutItemCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
 const { getRoomObjects } = require('../getRoomObjects')
 const crypto = require('crypto');
 
@@ -11,10 +11,10 @@ module.exports.handler = async (event, context) => {
     if (!bookingData) {
         console.log("Send No booking data")
     }
-    console.log(bookingData)
+   // console.log(bookingData)
     //Hämta alla rooms
     const rooms = await getRoomObjects(bookingData.startDate, bookingData.endDate);
-    console.log(rooms)   
+    //console.log(rooms)   
 
 
     // Kolla om det är några dagara som behöver skapas
@@ -33,27 +33,23 @@ module.exports.handler = async (event, context) => {
     const bookingsPerDate = getBookingDataForEachDate(dateList, bookingData)
     console.log(bookingsPerDate);
 
-    const success = (await bookRooms(bookingsPerDate));
-    if (!success){
-        console.log("Unable to book")
+    const result = (await bookRooms(bookingsPerDate));
+    if (!result.success){
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                success: false,
+                message: "Not enough rooms"
+            }),
+        };
     } else {
         var prices = {
 
         }
         rooms[0].Rooms.forEach(type => {
-            console.log("This is the type", type)
-            console.log("type.Type", type.Type)
-            console.log("type.Price", type.Price)
             prices[type.Type.toLowerCase()] = type.Price
-            // if(type.type = "Singel"){
-            //     singelPrice = type.Price
-            // } else if (type.type = "Double"){
-            //     dubblePrice = type.Price
-            // } else if (type.type = "Suit"){
-            //     suitPrice = type.Price
-            // }
         })
-      //  console.log(singelPrice, dubblePrice, suitPrice)
+
 
 
         const bookedRooms = []
@@ -70,16 +66,43 @@ module.exports.handler = async (event, context) => {
         const bookingOBJ = {
             "PK" : `Booking#${id}`,
             "SK" : bookingData.startDate,
-            id: id,
-            name: bookingData.name,
-            email: bookingData.email,
-            guests: bookingData.guests,
-            startDate: bookingData.startDate,
-            endDate: bookingData.endDate,
-            rooms: bookedRooms
+            BookingID: id,
+            Name: bookingData.name,
+            Email: bookingData.email,
+            NumberOfGuests: bookingData.guests,
+            StartDate: bookingData.startDate,
+            EndDate: bookingData.endDate,
+            Rooms: bookedRooms
         }
 
-        console.log(bookingOBJ);
+      //  console.log(bookingOBJ);
+        const savedBooking = await saveBookingToDb(bookingOBJ);
+        if (savedBooking.success){
+            const total = getTotalPrice(bookingOBJ.Rooms)
+            const bookingDetails = {
+                bookingnr: bookingOBJ.BookingID,
+                guest: bookingOBJ.NumberOfGuests,
+                rooms: bookingOBJ.Rooms,
+                checkInDate: bookingOBJ.StartDate,
+                checkOutDate: bookingOBJ.EndDate,
+                name: bookingOBJ.Name,
+                totalPrice: total
+            }            
+      //      scanAllItems();
+            return {
+                statusCode: 200,
+                body: JSON.stringify({
+                    success: true,
+                    details: bookingDetails
+                }),
+            };
+
+
+
+
+        } else{
+     //       console.log(savedBooking)
+        }
         // Add Booking to DB
         // get uniqueID
 
@@ -149,7 +172,7 @@ const createRoomObjectsInDb = async (dates) => {
     }
     try {
         const data = await dynamoDb.send(new BatchWriteItemCommand(params));
-        console.log('Succes', data)
+       // console.log('Succes', data)
     } catch (error) {
         console.error('Batch write failed:', error)
     }
@@ -161,7 +184,9 @@ const createRoomObjectsInDb = async (dates) => {
 }
 
 const bookRooms = async (bookingData) => {
+
     const transactItems = bookingData.map(booking => {
+        console.log("Booking", booking);
         const { date, rooms } = booking;
         const updateExpression = [];
         const expressionAttributeValues = {};
@@ -177,11 +202,13 @@ const bookRooms = async (bookingData) => {
         });
 
         const conditionExpressionParts = rooms.map(room => {
+            console.log(room);
             const typeIndex = roomTypeIndex(room.type);
+
             return `Rooms[${typeIndex}].Availability >= :${room.type}`;
         });
         const conditionExpression = conditionExpressionParts.join(' AND ');
-
+        
         const updateParams = {
             Update: {
                 TableName: "HotelTable",
@@ -194,15 +221,20 @@ const bookRooms = async (bookingData) => {
                 ConditionExpression: conditionExpression,
             }
         };
+      //  console.log("UprateParams ->", updateParams)
 
         return updateParams;
     });
+    transactItems.forEach(item => {
+        console.log(item)
+    })
 
     const params = {
         TransactItems: transactItems,
     };
 
     try {
+        //console.log(params)
         await dynamoDb.send(new TransactWriteItemsCommand(params));
         return { success: true };
     } catch (error) {
@@ -216,87 +248,6 @@ function roomTypeIndex(type) {
     return roomTypes.indexOf(type);
 }
 
-// const bookRooms = async (bookingData) => {
-
-
-    
-//     const transactItems = bookingData.map(booking => {
-//         // Skapa ett UpdateExpression för alla rumstyper på ett visst datum
-//         const updateExpression = [];
-//         const expressionAttributeValues = {};
-        
-//         if (booking.singel > 0) {
-//             updateExpression.push('Rooms[0].Availability = Rooms[0].Availability - :singel');
-//             expressionAttributeValues[':singel'] = { N: singel.toString() };
-//         }
-//         if (double > 0) {
-//             updateExpression.push('Rooms[1].Availability = Rooms[1].Availability - :double');
-//             expressionAttributeValues[':double'] = { N: double.toString() };
-//         }
-//         if (suit > 0) {
-//             updateExpression.push('Rooms[2].Availability = Rooms[2].Availability - :suit');
-//             expressionAttributeValues[':suit'] = { N: suit.toString() };
-//         }
-
-//         const updateParams = {
-//             Update: {
-//                 TableName: "HotelTable",
-//                 Key: {
-//                     PK: { S: 'ROOMS' },
-//                     SK: { S: date },
-//                 },
-//                 UpdateExpression: 'SET ' + updateExpression.join(', '),
-//                 ExpressionAttributeValues: expressionAttributeValues,
-//                 ConditionExpression: 'Rooms[0].Availability >= :singel AND Rooms[1].Availability >= :double AND Rooms[2].Availability >= :suit'
-//             }
-//         };
-//         return updateParams;
-//     });
-//     // const transactItems = [];
-//     // bookingData.forEach(booking => {
-//     //     const { date, rooms } = booking;
-//     //     rooms.forEach(room => {
-//     //         const { type, quantity } = room;
-//     //         const updateParams = {
-//     //             Update: {
-//     //                 TableName: "HotelTable",
-//     //                 Key: {
-//     //                     PK: { S: 'ROOMS' },
-//     //                     SK: { S: date },
-//     //                 },
-//     //                 UpdateExpression: 'SET Rooms[' +
-//     //                     roomTypeIndex(type) + 
-//     //                     '].Availability = Rooms[' + 
-//     //                     roomTypeIndex(type) + 
-//     //                     '].Availability - :quantity',
-//     //                 ExpressionAttributeValues: {
-//     //                     ':quantity': { N: quantity.toString() },
-//     //                 },
-//     //                 ConditionExpression: 'Rooms[' + 
-//     //                     roomTypeIndex(type) + 
-//     //                     '].Availability >= :quantity',  // Kontrollerar att tillräckligt med rum finns
-//     //             }
-//     //         };
-//     //         transactItems.push(updateParams);
-//     //     });
-//     // });
-//     const params = {
-//         TransactItems: transactItems
-//     };
-//     try {
-//         await dynamoDb.send(new TransactWriteItemsCommand(params))
-
-//         return { success: true }
-//     } catch (error) {
-//         return { success: false, error: error }
-//     }
-
-//     //console.log(transactItems);
-// }
-// function roomTypeIndex(type) {
-//     const roomTypes = ["single", "double", "suit"]; // Antag att dessa är de rumstyper du har
-//     return roomTypes.indexOf(type);
-// }
 
 const getNewRoomObjectForDate = (date) => {
     return newRoom = {
@@ -305,7 +256,51 @@ const getNewRoomObjectForDate = (date) => {
         "Rooms": [
             { "Type": "Single", "Beds": 1, "Price": 1000, "Availability": 7, "Bookings": [] },
             { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 10, "Bookings": [] },
-            { "Type": "Suit", "Beds": 2, "Price": 1500, "Availability": 3, "Bookings": [] }
+            { "Type": "Suit", "Beds": 2, "Price": 1800, "Availability": 3, "Bookings": [] }
         ]
     }
+}
+
+const saveBookingToDb = async (bookingOBJ) => {
+    const params = {
+        TableName: 'HotelTable',
+        Item: marshall(bookingOBJ)
+    };
+    try {
+        const data = await dynamoDb.send(new PutItemCommand(params));
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: error };
+    }
+}
+
+const scanAllItems = async () => {
+    const params = {
+        TableName: 'HotelTable', // Byt ut med ditt tabellnamn
+    };
+
+    try {
+        const data = await dynamoDb.send(new ScanCommand(params));
+
+        // Om vi har data, avmarschallera och logga till konsolen
+        if (data.Items) {
+            data.Items.forEach(item => {
+                const unmarshalledItem = unmarshall(item);  // Omvandla från DynamoDB format till ett vanligt JS-objekt
+     //           console.log(unmarshalledItem);
+            });
+        } else {
+   //        console.log('No items found');
+        }
+    } catch (error) {
+        console.error('Error scanning items:', error);
+    }
+};
+
+const getTotalPrice = (rooms) => {
+    var total = 0
+    rooms.forEach(room => {
+ //       console.log(room)
+        total += (room.quantity * room.pricePerRoom)
+    })
+    return total
 }
