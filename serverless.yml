@@ -1,5 +1,5 @@
 # "org" ensures this Service is used with the correct Serverless Framework Access Key.
-org: ktpersonal
+org: otrikss
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: hotel-api
 
@@ -7,7 +7,16 @@ provider:
   name: aws
   runtime: nodejs20.x
   region: eu-north-1
-  role: ${ssm:/for-class/iam/role}
+  environment:
+    DYNAMODB_TABLE: HotelTable
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+      Resource:
+        - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}
+
+
 
 package:
   exclude:
@@ -28,7 +37,7 @@ resources:
     MyDynamoDBTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: HotelTable
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
         AttributeDefinitions:
           - AttributeName: PK
             AttributeType: S
@@ -70,6 +79,7 @@ functions:
       - httpApi:
           path: /
           method: get
+
   addItem:
     handler: addItem.handler
     events:
@@ -89,10 +99,10 @@ functions:
                 guests: true
                 startDate: true
                 endDate: true
-  
+
   bookRooms:
     handler: functions/bookRooms/index.handler
-    events: 
+    events:
       - http:
           path: book-rooms
           method: POST
@@ -110,3 +120,4 @@ functions:
       - http:
           path: retrive-bookings/
           method: GET
+   
