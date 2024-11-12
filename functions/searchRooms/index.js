@@ -1,6 +1,8 @@
 const { marshall, unmarshall } = require('@aws-sdk/util-dynamodb');
 const dynamoDb = require('../../config/dynamodb');
 const { QueryCommand } = require("@aws-sdk/client-dynamodb");
+const { getRoomObjects } = require('../getRoomObjects');
+
 
 
 
@@ -16,49 +18,34 @@ module.exports.handler = async (event, context) => {
     }
 
 
-    const params = {
-        TableName: 'HotelTable',
-        KeyConditionExpression: 'PK = :roomKey AND SK BETWEEN :startDate AND :endDate',
-        ExpressionAttributeValues: {
-            ':roomKey': { S: 'ROOMS' },       
-            ':startDate': { S: startDate },  
-            ':endDate': { S: endDate }       
-        },
-    };
+    // const params = {
+    //     TableName: 'HotelTable',
+    //     KeyConditionExpression: 'PK = :roomKey AND SK BETWEEN :startDate AND :endDate',
+    //     ExpressionAttributeValues: {
+    //         ':roomKey': { S: 'ROOMS' },       
+    //         ':startDate': { S: startDate },  
+    //         ':endDate': { S: endDate }       
+    //     },
+    // };
 
     try {
-        const data = await dynamoDb.send(new QueryCommand(params));
-        const rooms = data.Items.map(item => unmarshall(item));
+        // const data = await dynamoDb.send(new QueryCommand(params));
+        // const rooms = data.Items.map(item => unmarshall(item));
+        const rooms = await getRoomObjects(startDate, endDate);
         // If the days isn't present in db, it is nothing booked that day. Add info for unbooked rooms
         if (rooms.length === 0 ){
             let newRooms = {
                 Rooms: [
                     {"Type": "Single", "Beds": 1, "Price": 1000, "Availability": 2, "Bookings": [] },
                     { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 15, "Bookings": [] },
-                    { "Type": "Suit", "Beds": 2, "Price": 1500, "Availability": 3, "Bookings": [] }
+                    { "Type": "Suit", "Beds": 2, "Price": 1800, "Availability": 3, "Bookings": [] }
                   ]
             }
             rooms.push(newRooms)
         }
      
-        const lowestAvailabilityByRoomType = {};
-        rooms.forEach(day => {
-            day.Rooms.forEach(roomType => {
-                const type = roomType.Type;
-                if (!lowestAvailabilityByRoomType[type]) {
-                    lowestAvailabilityByRoomType[type] = {
-                        beds: roomType.Beds,
-                        pricePerNight: roomType.Price,
-                        availability: roomType.Availability 
-                    };
-                } else {
-                   
-                    if (lowestAvailabilityByRoomType[type].Availability > roomType.Availability) {
-                        lowestAvailabilityByRoomType[type].Availability = roomType.Availability;
-                    }
-                }
-            });
-        });
+        const lowestAvailabilityByRoomType = getLowestAvailabilityByRoomType(rooms);
+
         const beds = getNrOfBedsFree(lowestAvailabilityByRoomType);
         if (guests > beds){
 
@@ -85,8 +72,29 @@ module.exports.handler = async (event, context) => {
             body: JSON.stringify({ error: 'Could not retrieve rooms' }),
         };
     }
+}
 
-
+const getLowestAvailabilityByRoomType = (rooms) => {
+    const lowestAvailabilityByRoomType = {};
+    rooms.forEach(day => {
+        day.Rooms.forEach(roomType => {
+            const type = roomType.Type;
+            console.log(type.Availability)
+            if (!lowestAvailabilityByRoomType[type]) {
+                lowestAvailabilityByRoomType[type] = {
+                    beds: roomType.Beds,
+                    pricePerNight: roomType.Price,
+                    availability: roomType.Availability 
+                };
+            } else {
+               
+                if (lowestAvailabilityByRoomType[type].availability > roomType.Availability) {
+                    lowestAvailabilityByRoomType[type].availability = roomType.Availability;
+                }
+            }
+        });
+    });
+    return lowestAvailabilityByRoomType;
 }
 
 const getNrOfBedsFree = (availability) => {
@@ -98,20 +106,17 @@ const getNrOfBedsFree = (availability) => {
     return beds
 }
 
-function generateDateRange(startDate, endDate) {
-    const dateArray = [];
-    let currentDate = new Date(startDate);
-    const end = new Date(endDate);
-
-    // Loopar genom varje datum i intervallet
-    while (currentDate <= end) {
-        // Skapa sträng i formatet YYYY-MM-DD
-        const dateString = currentDate.toISOString().split('T')[0];
-        dateArray.push(dateString);
-
-        // Lägg till en dag
-        currentDate.setDate(currentDate.getDate() + 1);
-    }
-
-    return dateArray;
-}
+// module.exports.getRoomObjects = async (startDate, endDate) =>{
+//     const params = {
+//         TableName: 'HotelTable',
+//         KeyConditionExpression: 'PK = :roomKey AND SK BETWEEN :startDate AND :endDate',
+//         ExpressionAttributeValues: {
+//             ':roomKey': { S: 'ROOMS' },       
+//             ':startDate': { S: startDate },  
+//             ':endDate': { S: endDate }       
+//         },
+//     };
+//     const data = await dynamoDb.send(new QueryCommand(params));
+//     const rooms = data.Items.map(item => unmarshall(item));
+//     return rooms
+// }
