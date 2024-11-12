@@ -3,9 +3,6 @@ const dynamoDb = require('../../config/dynamodb');
 const { QueryCommand } = require("@aws-sdk/client-dynamodb");
 const { getRoomObjects } = require('../getRoomObjects');
 
-
-
-
 module.exports.handler = async (event, context) => {
     const { guests, startDate, endDate } = event.queryStringParameters || {};
     if (!guests || !startDate || !endDate) {
