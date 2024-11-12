@@ -59,6 +59,17 @@ module.exports.handler = async (event, context) => {
                 }
             });
         });
+        const beds = getNrOfBedsFree(lowestAvailabilityByRoomType);
+        if (guests > beds){
+
+            return {
+                statusCode: 200,
+                body: JSON.stringify({
+                    message: 'Not enough rooms available',
+                    rooms: lowestAvailabilityByRoomType,
+                }),
+            };
+        }
 
         return {
             statusCode: 200,
@@ -76,6 +87,15 @@ module.exports.handler = async (event, context) => {
     }
 
 
+}
+
+const getNrOfBedsFree = (availability) => {
+    var beds = 0
+    Object.keys(availability).forEach(roomType => {
+        const room = availability[roomType];
+        beds += (room.beds * room.availability)
+    })
+    return beds
 }
 
 function generateDateRange(startDate, endDate) {
