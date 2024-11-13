@@ -1,4 +1,5 @@
 # "org" ensures this Service is used with the correct Serverless Framework Access Key.
+
 org: irresarac
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: hotel-api
@@ -98,10 +99,10 @@ functions:
                 guests: true
                 startDate: true
                 endDate: true
-  
+
   bookRooms:
     handler: functions/bookRooms/index.handler
-    events: 
+    events:
       - http:
           path: book-rooms
           method: POST
@@ -119,3 +120,4 @@ functions:
       - http:
           path: retrive-bookings/
           method: GET
+   
