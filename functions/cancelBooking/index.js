@@ -22,7 +22,7 @@ module.exports.handler = async (event, context) => {
   const getParams = {
     TableName: "HotelTable",
     Key: {
-      PK: { S: `BOOKING#${bookingId}` },
+      PK: { S: `Booking#${bookingId}` },
       SK: { S: "DETAILS" },
     },
   };
@@ -57,7 +57,7 @@ module.exports.handler = async (event, context) => {
   const params = {
     TableName: "HotelTable",
     Key: {
-      PK: { S: `BOOKING#${bookingId}` },
+      PK: { S: `Booking#${bookingId}` },
       SK: { S: "DETAILS" }, 
     },
   };
