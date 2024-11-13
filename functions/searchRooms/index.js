@@ -1,18 +1,10 @@
-const { marshall, unmarshall } = require('@aws-sdk/util-dynamodb');
-const dynamoDb = require('../../config/dynamodb');
-const { QueryCommand } = require("@aws-sdk/client-dynamodb");
 const { getRoomObjects } = require('../getRoomObjects');
 const { createErrorResponse, createSuccessResponse } = require('../../utils/responses');
 
 module.exports.handler = async (event, context) => {
     const { guests, startDate, endDate } = event.queryStringParameters || {};
     if (!guests || !startDate || !endDate) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: 'Missing required query parameters: guests, startDate, and endDate are all required.',
-            }),
-        };
+        return createErrorResponse("Missing required query parameters: guests, startDate, and endDate are all required.")
     }
 
     try {
@@ -36,7 +28,6 @@ module.exports.handler = async (event, context) => {
         if (guests > beds){
             return createErrorResponse("Not enough rooms available.");
         }
-
             return createSuccessResponse(lowestAvailabilityByRoomType);
 
     } catch (error) {
@@ -50,7 +41,7 @@ const getLowestAvailabilityByRoomType = (rooms) => {
     rooms.forEach(day => {
         day.Rooms.forEach(roomType => {
             const type = roomType.Type;
-            console.log(type.Availability)
+       
             if (!lowestAvailabilityByRoomType[type]) {
                 lowestAvailabilityByRoomType[type] = {
                     beds: roomType.Beds,
