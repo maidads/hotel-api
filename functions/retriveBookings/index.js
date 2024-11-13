@@ -6,8 +6,8 @@ const { buildFilterExpression, buildKeyConditionExpression } = require('../../ut
 
 module.exports.handler = async (event, context) => {
 
-    try {
-        const tableName = process.env.DYNAMODB_TABLE;
+    try {   
+        const tableName = "HotelTable";
         const queryParams = event.queryStringParameters || {};
 
         if (queryParams.bookingId) {
