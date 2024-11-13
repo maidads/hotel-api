@@ -1,5 +1,5 @@
 # "org" ensures this Service is used with the correct Serverless Framework Access Key.
-org: ktpersonal
+org: irresarac
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: hotel-api
 
@@ -7,7 +7,7 @@ provider:
   name: aws
   runtime: nodejs20.x
   region: eu-north-1
-  role: ${ssm:/for-class/iam/role}
+
 
 package:
   exclude:
@@ -64,18 +64,27 @@ plugins:
 
 
 functions:
+  modifyBooking:
+    handler: functions/modifyBooking.handler
+    events:
+      - http:
+          path: modify-booking
+          method: POST
+          
   hello:
     handler: handler.hello
     events:
       - httpApi:
           path: /
-          method: get
+          method: GET
+          
   addItem:
     handler: addItem.handler
     events:
       - httpApi:
           path: /items
-          method: post
+          method: POST
+
 
   searchRooms:
     handler: functions/searchRooms/index.handler
