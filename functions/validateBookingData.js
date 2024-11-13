@@ -33,11 +33,24 @@ module.exports.validateBookingData = (data) => {
         if (typeof room.quantity !== "number" || room.quantity <= 0) {
             return { valid: false, message: "Quantity must be a positive number" };
         }
+
     }
 
     // Kontrollera att åtminstone en av rummen har en giltig typ
     if (!hasValidRoom) {
         return { valid: false, message: "At least one room must be of type 'single', 'double', or 'suit'" };
+    }
+
+    const startDate = new Date(data.startDate);
+    const endDate = new Date(data.endDate);
+
+    if (startDate.getTime() === endDate.getTime()) {
+        return { valid: false, message: "Start date and end date cannot be the same" };
+    }
+
+    // Kontrollera att endDate inte är före startDate
+    if (endDate.getTime() < startDate.getTime()) {
+        return { valid: false, message: "End date cannot be before start date" };
     }
 
     // Om allt är korrekt returnera true

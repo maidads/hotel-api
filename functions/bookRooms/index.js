@@ -59,7 +59,8 @@ module.exports.handler = async (event, context) => {
             }),
         };
     } else {
-        const total = getTotalPrice(bookingOBJ.Rooms)
+        const nights = dateList.length-1
+        const total = getTotalPrice(bookingOBJ.Rooms, nights) 
         console.log("Total", total);
         const bookingDetails = {
             bookingnr: bookingOBJ.BookingID,
@@ -292,11 +293,11 @@ const getPutParamsForBooking = (bookingOBJ) => {
 //     }
 // };
 
-const getTotalPrice = (rooms) => {
+const getTotalPrice = (rooms, nights) => {
     var total = 0
     rooms.forEach(room => {
         //       console.log(room)
         total += (room.Quantity * room.Price)
     })
-    return total
+    return (total * nights)
 }
