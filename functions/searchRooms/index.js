@@ -2,6 +2,7 @@ const { marshall, unmarshall } = require('@aws-sdk/util-dynamodb');
 const dynamoDb = require('../../config/dynamodb');
 const { QueryCommand } = require("@aws-sdk/client-dynamodb");
 const { getRoomObjects } = require('../getRoomObjects');
+const { createErrorResponse, createSuccessResponse } = require('../../utils/responses');
 
 module.exports.handler = async (event, context) => {
     const { guests, startDate, endDate } = event.queryStringParameters || {};
@@ -14,20 +15,8 @@ module.exports.handler = async (event, context) => {
         };
     }
 
-
-    // const params = {
-    //     TableName: 'HotelTable',
-    //     KeyConditionExpression: 'PK = :roomKey AND SK BETWEEN :startDate AND :endDate',
-    //     ExpressionAttributeValues: {
-    //         ':roomKey': { S: 'ROOMS' },       
-    //         ':startDate': { S: startDate },  
-    //         ':endDate': { S: endDate }       
-    //     },
-    // };
-
     try {
-        // const data = await dynamoDb.send(new QueryCommand(params));
-        // const rooms = data.Items.map(item => unmarshall(item));
+
         const rooms = await getRoomObjects(startDate, endDate);
         // If the days isn't present in db, it is nothing booked that day. Add info for unbooked rooms
         if (rooms.length === 0 ){
@@ -45,29 +34,14 @@ module.exports.handler = async (event, context) => {
 
         const beds = getNrOfBedsFree(lowestAvailabilityByRoomType);
         if (guests > beds){
-
-            return {
-                statusCode: 200,
-                body: JSON.stringify({
-                    message: 'Not enough rooms available',
-                    rooms: lowestAvailabilityByRoomType,
-                }),
-            };
+            return createErrorResponse("Not enough rooms available.");
         }
 
-        return {
-            statusCode: 200,
-            body: JSON.stringify({
-                message: 'Rooms retrieved successfully.',
-                rooms: lowestAvailabilityByRoomType,
-            }),
-        };
+            return createSuccessResponse(lowestAvailabilityByRoomType);
+
     } catch (error) {
         console.error('Error querying rooms:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: 'Could not retrieve rooms' }),
-        };
+        return createErrorResponse("Error querying rooms")
     }
 }
 
@@ -103,17 +77,3 @@ const getNrOfBedsFree = (availability) => {
     return beds
 }
 
-// module.exports.getRoomObjects = async (startDate, endDate) =>{
-//     const params = {
-//         TableName: 'HotelTable',
-//         KeyConditionExpression: 'PK = :roomKey AND SK BETWEEN :startDate AND :endDate',
-//         ExpressionAttributeValues: {
-//             ':roomKey': { S: 'ROOMS' },       
-//             ':startDate': { S: startDate },  
-//             ':endDate': { S: endDate }       
-//         },
-//     };
-//     const data = await dynamoDb.send(new QueryCommand(params));
-//     const rooms = data.Items.map(item => unmarshall(item));
-//     return rooms
-// }
