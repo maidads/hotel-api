@@ -112,7 +112,7 @@ functions:
     handler: functions/cancelBooking/index.handler
     events:
       - http:
-          path: cancel-booking/{id}
+          path: cancel-booking/{id}/{date}
           method: DELETE
 
   retrive-bookings:
