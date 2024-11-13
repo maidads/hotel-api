@@ -1,12 +1,14 @@
-const AWS = require("aws-sdk");
-const dynamoDB = new AWS.DynamoDB.DocumentClient();
+const { getRoomObjects } = require('./getRoomObjects');
+const { UpdateCommand } = require("@aws-sdk/lib-dynamodb");
+const dynamoDb = require('../config/dynamodb');
 
 module.exports.handler = async (event) => {
   try {
-    // 1. Parse input data from the request
+    // Parse input data
     const data = JSON.parse(event.body);
+    console.log("Request data:", data);
 
-    // 2. Validate input data
+    // Validate input
     if (
       !data.bookingId ||
       !data.checkInDate ||
@@ -14,13 +16,14 @@ module.exports.handler = async (event) => {
       !data.roomTypes ||
       !data.numberOfGuests
     ) {
+      console.error("Validation failed: Missing required fields");
       return {
         statusCode: 400,
         body: JSON.stringify({ message: "Missing required fields" }),
       };
     }
 
-    // 3. Check if room count matches the number of guests
+    // Check total capacity
     const totalCapacity = data.roomTypes.reduce((sum, room) => {
       if (room.type === "Single") return sum + room.count * 1;
       if (room.type === "Double") return sum + room.count * 2;
@@ -28,7 +31,10 @@ module.exports.handler = async (event) => {
       return sum;
     }, 0);
 
+    console.log("Total capacity:", totalCapacity);
+
     if (totalCapacity < data.numberOfGuests) {
+      console.error("Capacity check failed");
       return {
         statusCode: 400,
         body: JSON.stringify({
@@ -37,13 +43,27 @@ module.exports.handler = async (event) => {
       };
     }
 
-    // 4. Define keys for the booking to be updated
+    // Check room availability
+    const rooms = await getRoomObjects(data.checkInDate, data.checkOutDate);
+    console.log("Rooms fetched:", rooms);
+
+    const isAvailable = checkAvailability(rooms, data.roomTypes);
+    if (!isAvailable) {
+      console.error("Room availability check failed");
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: "Selected rooms are not available" }),
+      };
+    }
+
+    // Define keys for updating booking
     const bookingKey = {
       PK: `BOOKING#${data.bookingId}`,
       SK: "METADATA",
     };
+    console.log("Booking Key:", bookingKey);
 
-    // 5. Create update expressions
+    // Update booking in DynamoDB
     const updateExpression = `
       SET guestName = :guestName,
           checkInDate = :checkInDate,
@@ -59,17 +79,18 @@ module.exports.handler = async (event) => {
       ":numberOfGuests": data.numberOfGuests,
     };
 
-    // 6. Perform the update in DynamoDB
-    await dynamoDB
-      .update({
-        TableName: "HotelTable", // Name of your table from serverless.yml
+    console.log("Expression Attribute Values:", expressionAttributeValues);
+
+    await dynamoDb.send(
+      new UpdateCommand({
+        TableName: "HotelTable",
         Key: bookingKey,
         UpdateExpression: updateExpression,
         ExpressionAttributeValues: expressionAttributeValues,
       })
-      .promise();
+    );
 
-    // 7. Return a success message
+    console.log("Booking successfully updated");
     return {
       statusCode: 200,
       body: JSON.stringify({
@@ -79,10 +100,41 @@ module.exports.handler = async (event) => {
       }),
     };
   } catch (error) {
-    console.error(error);
+    console.error("Error modifying booking:", error); 
     return {
       statusCode: 500,
-      body: JSON.stringify({ message: "Error updating booking", error }),
+      body: JSON.stringify({
+        message: "Error updating booking",
+        error: error.message || "Unknown error",
+      }),
     };
   }
 };
+
+// Helper function to check room availability
+function checkAvailability(rooms, requestedRoomTypes) {
+  console.log("Checking availability for rooms:", rooms);
+  console.log("Requested room types:", requestedRoomTypes);
+
+  for (const requested of requestedRoomTypes) {
+    const room = rooms.find((r) => {
+      console.log("Comparing room type:", r.Rooms, "with requested type:", requested.type);
+      return r.Rooms.some((roomType) => roomType.Type === requested.type);
+    });
+
+    if (!room) {
+      console.warn("No room found for requested type:", requested.type);
+      return false;
+    }
+
+    const availableRoom = room.Rooms.find((roomType) => roomType.Type === requested.type);
+    if (availableRoom.Availability < requested.count) {
+      console.warn(
+        `Room type ${requested.type} does not have enough availability. Needed: ${requested.count}, Available: ${availableRoom.Availability}`
+      );
+      return false;
+    }
+  }
+
+  return true;
+}
