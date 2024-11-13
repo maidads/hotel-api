@@ -1,4 +1,4 @@
-const { marshall, unmarshall } = require('@aws-sdk/util-dynamodb');
+const { marshall } = require('@aws-sdk/util-dynamodb');
 const dynamoDb = require('../../config/dynamodb');
 const { TransactWriteItemsCommand, BatchWriteItemCommand, PutItemCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
 const { getRoomObjects } = require('../getRoomObjects');
