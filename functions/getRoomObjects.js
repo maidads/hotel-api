@@ -1,5 +1,5 @@
 
-const { marshall, unmarshall } = require('@aws-sdk/util-dynamodb');
+const { unmarshall } = require('@aws-sdk/util-dynamodb');
 const dynamoDb = require('../config/dynamodb');
 const { QueryCommand } = require("@aws-sdk/client-dynamodb");
 
