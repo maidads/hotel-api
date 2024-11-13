@@ -5,12 +5,11 @@ const { getRoomObjects } = require('../getRoomObjects');
 const crypto = require('crypto');
 const {validateBookingData} = require('../validateBookingData');
 const {getBodyJson} = require('../getBodyJson');
+const { generateDateRange} =require('../../utils/generateDateRange')
 
 
 module.exports.handler = async (event, context) => {
 
-    //const body = event.body;
-    //const bookingData = JSON.parse(body);
     const bookingData = getBodyJson(event);
 
     if (bookingData.error) {
@@ -95,22 +94,22 @@ const getBookingDataForEachDate = (dates, bookingData) => {
     return bookingForEachDate;
 }
 
-function generateDateRange(startDate, endDate) {
-    const dateArray = [];
-    let currentDate = new Date(startDate);
-    const end = new Date(endDate);
+// function generateDateRange(startDate, endDate) {
+//     const dateArray = [];
+//     let currentDate = new Date(startDate);
+//     const end = new Date(endDate);
 
-    // Loopar genom varje datum i intervallet
-    while (currentDate <= end) {
-        // Skapa sträng i formatet YYYY-MM-DD
-        const dateString = currentDate.toISOString().split('T')[0];
-        dateArray.push(dateString);
+//     // Loopar genom varje datum i intervallet
+//     while (currentDate <= end) {
+//         // Skapa sträng i formatet YYYY-MM-DD
+//         const dateString = currentDate.toISOString().split('T')[0];
+//         dateArray.push(dateString);
 
-        // Lägg till en dag
-        currentDate.setDate(currentDate.getDate() + 1);
-    }
-    return dateArray;
-}
+//         // Lägg till en dag
+//         currentDate.setDate(currentDate.getDate() + 1);
+//     }
+//     return dateArray;
+// }
 
 const createRoomObjectsInDb = async (dates) => {
     const roomObjects = []
@@ -211,20 +210,11 @@ const getNewRoomObjectForDate = (date) => {
     }
 }
 
-const saveBookingToDb = async (bookingOBJ) => {
-    const params = {
-        TableName: 'HotelTable',
-        Item: marshall(bookingOBJ)
-    };
-    try {
-        const data = await dynamoDb.send(new PutItemCommand(params));
-        return { success: true };
-    } catch (error) {
-        return { success: false, error: error };
-    }
-}
-
 const getBookingOBJ = (bookingData, room) => {
+    console.log(room)
+    if (room === undefined){
+        room = getNewRoomObjectForDate("dosent matter")// just to get the room types
+    }
     var prices = {
     }
     room.Rooms.forEach(type => {
