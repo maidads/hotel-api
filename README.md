@@ -1,16 +1,32 @@
-BaseURL: https://e7kbb8tatb.execute-api.eu-north-1.amazonaws.com/dev
+# Hotel Booking API
 
+This API manages bookings and room availability for a hotel. It is built with a serverless architecture on AWS and uses DynamoDB to store booking data.
 
-End Points
+## Base URL
 
-/search-rooms
-Requierd
-Queryparams:
-Guest - Number of guest as a whole number
-startDate - check in date as a string in yyyy-mm-dd format
-endDate - check ut date as a string in yyyy-mm-dd format
+```plaintext
+https://e7kbb8tatb.execute-api.eu-north-1.amazonaws.com/dev
+```
 
-Example: /search-rooms?guests=2&startDate=2024-11-01&endDate=2024-11-02
+## End Points
+### 1. Search Available Rooms
+
+- **Endpoint**: `/search-rooms`
+- **Method**: `GET`
+- **Description**: Retrieves available rooms based on the number of guests and the specified check-in and check-out date range.
+
+#### Query Parameters
+
+| Parameter | Type    | Description                                     |
+|-----------|---------|-------------------------------------------------|
+| `guests`  | Integer | Number of guests                                |
+| `startDate` | String | Check-in date in `yyyy-mm-dd` format            |
+| `endDate`   | String | Check-out date in `yyyy-mm-dd` format           |
+
+#### Example Request
+```plaintext
+GET /search-rooms?guests=2&startDate=2024-11-01&endDate=2024-11-02
+```
 
 Response: Message is either "Rooms retrieved successfully.” Or  "message": "Not enough rooms available”
 
