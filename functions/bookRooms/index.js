@@ -60,6 +60,7 @@ module.exports.handler = async (event, context) => {
         };
     } else {
         const total = getTotalPrice(bookingOBJ.Rooms)
+        console.log("Total", total);
         const bookingDetails = {
             bookingnr: bookingOBJ.BookingID,
             guest: bookingOBJ.NumberOfGuests,
@@ -295,7 +296,7 @@ const getTotalPrice = (rooms) => {
     var total = 0
     rooms.forEach(room => {
         //       console.log(room)
-        total += (room.quantity * room.pricePerRoom)
+        total += (room.Quantity * room.Price)
     })
     return total
 }
