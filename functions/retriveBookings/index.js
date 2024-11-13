@@ -5,7 +5,6 @@ const { extractBookingData } = require('../../utils/bookingHelpers');
 const { buildFilterExpression, buildKeyConditionExpression } = require('../../utils/dynamodbHelpers');
 
 module.exports.handler = async (event, context) => {
-    console.log("Retrieve bookings!");
 
     try {
         const tableName = process.env.DYNAMODB_TABLE;
