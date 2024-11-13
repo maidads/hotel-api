@@ -5,7 +5,8 @@ const { getRoomObjects } = require('../getRoomObjects');
 const crypto = require('crypto');
 const {validateBookingData} = require('../validateBookingData');
 const {getBodyJson} = require('../getBodyJson');
-const { generateDateRange} =require('../../utils/generateDateRange')
+const { generateDateRange} =require('../../utils/generateDateRange');
+const { createErrorResponse, createSuccessResponse } = require('../../utils/responses');
 
 
 module.exports.handler = async (event, context) => {
@@ -13,26 +14,12 @@ module.exports.handler = async (event, context) => {
     const bookingData = getBodyJson(event);
 
     if (bookingData.error) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                success: false,
-                message: bookingData.error
-            }),
-        };
+        return createErrorResponse(bookingData.error)
     }
     const validData = validateBookingData(bookingData);
     if (!validData.valid){
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                success: false,
-                message: validData.message
-            }),
-        };
+        return createErrorResponse(validData.message)
     }
-
-    //Hämta alla rooms
     const rooms = await getRoomObjects(bookingData.startDate, bookingData.endDate);
 
     // Kolla om det är några dagara som behöver skapas
@@ -50,17 +37,12 @@ module.exports.handler = async (event, context) => {
     const bookingOBJ = getBookingOBJ(bookingData, rooms[0])
     const result = (await bookRooms(bookingsPerDate, bookingOBJ));
     if (!result.success) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                success: false,
-                message: "Not enough rooms"
-            }),
-        };
+        return createErrorResponse("Not enough rooms available.")
+
     } else {
         const nights = dateList.length-1
         const total = getTotalPrice(bookingOBJ.Rooms, nights) 
-        console.log("Total", total);
+
         const bookingDetails = {
             bookingnr: bookingOBJ.BookingID,
             guest: bookingOBJ.NumberOfGuests,
@@ -70,15 +52,8 @@ module.exports.handler = async (event, context) => {
             name: bookingOBJ.Name,
             totalPrice: total
         }
- //       console.log("Now is scan!")
-        //       await scanAllItems();
-        return {
-            statusCode: 200,
-            body: JSON.stringify({
-                success: true,
-                details: bookingDetails
-            }),
-        };
+
+        return createSuccessResponse(bookingDetails)
     }
 }
 
@@ -93,23 +68,6 @@ const getBookingDataForEachDate = (dates, bookingData) => {
     })
     return bookingForEachDate;
 }
-
-// function generateDateRange(startDate, endDate) {
-//     const dateArray = [];
-//     let currentDate = new Date(startDate);
-//     const end = new Date(endDate);
-
-//     // Loopar genom varje datum i intervallet
-//     while (currentDate <= end) {
-//         // Skapa sträng i formatet YYYY-MM-DD
-//         const dateString = currentDate.toISOString().split('T')[0];
-//         dateArray.push(dateString);
-
-//         // Lägg till en dag
-//         currentDate.setDate(currentDate.getDate() + 1);
-//     }
-//     return dateArray;
-// }
 
 const createRoomObjectsInDb = async (dates) => {
     const roomObjects = []
@@ -137,7 +95,7 @@ const createRoomObjectsInDb = async (dates) => {
 const bookRooms = async (bookingData, bookingOBJ) => {
 
     const transactItems = bookingData.map(booking => {
-        //  console.log("Booking", booking);
+
         const { date, rooms } = booking;
         const updateExpression = [];
         const expressionAttributeValues = {};
@@ -153,7 +111,7 @@ const bookRooms = async (bookingData, bookingOBJ) => {
         });
 
         const conditionExpressionParts = rooms.map(room => {
-            console.log(room);
+
             const typeIndex = roomTypeIndex(room.type);
 
             return `Rooms[${typeIndex}].Availability >= :${room.type}`;
@@ -187,6 +145,7 @@ const bookRooms = async (bookingData, bookingOBJ) => {
         await dynamoDb.send(new TransactWriteItemsCommand(params));
         return { success: true };
     } catch (error) {
+
         return { success: false, error: error };
     }
 };
@@ -203,15 +162,15 @@ const getNewRoomObjectForDate = (date) => {
         "PK": "ROOMS",
         "SK": date,
         "Rooms": [
-            { "Type": "Single", "Beds": 1, "Price": 1000, "Availability": 7, "Bookings": [] },
-            { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 10, "Bookings": [] },
-            { "Type": "Suit", "Beds": 2, "Price": 1800, "Availability": 3, "Bookings": [] }
+            { "Type": "Single", "Beds": 1, "Price": 1000, "Availability": 2, "Bookings": [] },
+            { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 15, "Bookings": [] },
+            { "Type": "Suit", "Beds": 3, "Price": 1800, "Availability": 3, "Bookings": [] }
         ]
     }
 }
 
 const getBookingOBJ = (bookingData, room) => {
-    console.log(room)
+
     if (room === undefined){
         room = getNewRoomObjectForDate("dosent matter")// just to get the room types
     }
@@ -261,32 +220,9 @@ const getPutParamsForBooking = (bookingOBJ) => {
     return bookingParam
 }
 
-// const scanAllItems = async () => {
-//     const params = {
-//         TableName: 'HotelTable', // Byt ut med ditt tabellnamn
-//     };
-
-//     try {
-//         const data = await dynamoDb.send(new ScanCommand(params));
-
-//         // Om vi har data, avmarschallera och logga till konsolen
-//         if (data.Items) {
-//             data.Items.forEach(item => {
-//                 const unmarshalledItem = unmarshall(item);  // Omvandla från DynamoDB format till ett vanligt JS-objekt
-//                 console.log(unmarshalledItem);
-//             });
-//         } else {
-//            console.log('No items found');
-//         }
-//     } catch (error) {
-//         console.error('Error scanning items:', error);
-//     }
-// };
-
 const getTotalPrice = (rooms, nights) => {
     var total = 0
     rooms.forEach(room => {
-        //       console.log(room)
         total += (room.Quantity * room.Price)
     })
     return (total * nights)

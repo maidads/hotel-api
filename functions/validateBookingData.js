@@ -36,10 +36,6 @@ module.exports.validateBookingData = (data) => {
             return { valid: false, message: "Quantity must be a positive number" };
         }
         totalBeds += (bedsInRooms[room.type] * parseInt(room.quantity));
-        console.log(bedsInRooms)
-        console.log(room.type)
-        console.log(room.quantity)
-        console.log(totalBeds)
     }
 
 
