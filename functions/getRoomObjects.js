@@ -3,7 +3,10 @@ const { marshall, unmarshall } = require('@aws-sdk/util-dynamodb');
 const dynamoDb = require('../config/dynamodb');
 const { QueryCommand } = require("@aws-sdk/client-dynamodb");
 
-module.exports.getRoomObjects = async (startDate, endDate) =>{
+module.exports.getRoomObjects = async (startDate, endDate) => {
+    
+    console.log("Fetching rooms for:", { startDate, endDate });
+
     const params = {
         TableName: 'HotelTable',
         KeyConditionExpression: 'PK = :roomKey AND SK BETWEEN :startDate AND :endDate',
@@ -13,7 +16,26 @@ module.exports.getRoomObjects = async (startDate, endDate) =>{
             ':endDate': { S: endDate }       
         },
     };
-    const data = await dynamoDb.send(new QueryCommand(params));
-    const rooms = data.Items.map(item => unmarshall(item));
-    return rooms
-}
+
+    try {
+        
+        const data = await dynamoDb.send(new QueryCommand(params));
+        console.log("Raw data fetched from DynamoDB:", data.Items);
+
+       
+        if (!data.Items || data.Items.length === 0) {
+            console.warn("No rooms found for the given period:", { startDate, endDate });
+            return [];
+        }
+
+       
+        const rooms = data.Items.map(item => unmarshall(item));
+        console.log("Unmarshalled rooms:", rooms);
+
+        return rooms;
+    } catch (error) {
+        
+        console.error('Error fetching rooms from DynamoDB:', error);
+        throw error;
+    }
+};
