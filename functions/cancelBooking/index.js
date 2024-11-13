@@ -1,12 +1,12 @@
- const { DynamoDBClient, DeleteItemCommand, GetItemCommand } = require("@aws-sdk/client-dynamodb");
-const dynamoDb = new DynamoDBClient();
+const { DynamoDBClient, DeleteItemCommand, GetItemCommand, QueryCommand } = require("@aws-sdk/client-dynamodb");
+const dynamoDb = require('../../config/dynamodb');
 
 module.exports.handler = async (event, context) => {
   const bookingId = event.pathParameters.id;
+  const checkInDate = event.pathParameters.date;
   
   console.log("Booking ID:", bookingId);
 
-//Kontrollera att bokning finns.
 
   if (!bookingId) {
     return {
@@ -15,22 +15,22 @@ module.exports.handler = async (event, context) => {
     };
   }
 
-
-//hämta boknings info och kontrollera om det är mer än 2dar
-//kvar till det bokade datumet.
-
   const getParams = {
     TableName: "HotelTable",
     Key: {
       PK: { S: `Booking#${bookingId}` },
-      SK: { S: "DETAILS" },
+      SK: {S: checkInDate,}
     },
   };
 
+
+
   try {
     const getCommand = new GetItemCommand(getParams);
-    const getResult = await dynamoDb.send(getCommand);
 
+    const getResult = await dynamoDb.send(getCommand);
+  
+    console.log(getResult);
     if (!getResult.Item) {
       return {
         statusCode: 404,
@@ -38,7 +38,7 @@ module.exports.handler = async (event, context) => {
       };
     }
 
-    const bookingDate = getResult.Item.bookingDate.S;
+    const bookingDate = getResult.Item.StartDate.S;
     const bookingDateObj = new Date(bookingDate);
     const currentDate = new Date();
 
@@ -58,7 +58,7 @@ module.exports.handler = async (event, context) => {
     TableName: "HotelTable",
     Key: {
       PK: { S: `Booking#${bookingId}` },
-      SK: { S: "DETAILS" }, 
+      SK: {S: bookingDate}
     },
   };
 

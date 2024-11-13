@@ -48,11 +48,11 @@
 
     {
         "PK": "Booking#001",
-        "SK": "2024-11-01",
+        "SK": "2024-12-01",
         "Name": "John Doe",
         "Email": "john.doe@example.com",
-        "StartDate": "2024-11-01",
-        "EndDate": "2024-11-03",
+        "StartDate": "2024-12-01",
+        "EndDate": "2024-12-03",
         "BookingID": "001",
         "NumberOfGuests": 1,
         "Rooms": [
