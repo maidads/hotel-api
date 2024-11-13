@@ -10,8 +10,6 @@ const { generateDateRange} =require('../../utils/generateDateRange')
 
 module.exports.handler = async (event, context) => {
 
-    //const body = event.body;
-    //const bookingData = JSON.parse(body);
     const bookingData = getBodyJson(event);
 
     if (bookingData.error) {
@@ -209,19 +207,6 @@ const getNewRoomObjectForDate = (date) => {
             { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 10, "Bookings": [] },
             { "Type": "Suit", "Beds": 2, "Price": 1800, "Availability": 3, "Bookings": [] }
         ]
-    }
-}
-
-const saveBookingToDb = async (bookingOBJ) => {
-    const params = {
-        TableName: 'HotelTable',
-        Item: marshall(bookingOBJ)
-    };
-    try {
-        const data = await dynamoDb.send(new PutItemCommand(params));
-        return { success: true };
-    } catch (error) {
-        return { success: false, error: error };
     }
 }
 
