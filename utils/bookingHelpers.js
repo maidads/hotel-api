@@ -3,10 +3,12 @@ const { unmarshall } = require("@aws-sdk/util-dynamodb");
 function extractBookingData(item) {
     const itemData = unmarshall(item);
 
-    const roomTypes = (itemData.Rooms || []).map(room => room.Type);
+    console.log("Unmarshalled item data:", itemData);
+
+    const roomTypes = (itemData.Rooms || []).map(room => room.Type || room.type);
 
     return {
-        bookingNumber: itemData.BookingID,
+        bookingNumber: itemData.PK.replace('Booking#', ''),
         checkInDate: itemData.StartDate,
         checkOutDate: itemData.EndDate,
         numberOfGuests: itemData.NumberOfGuests,
@@ -15,6 +17,7 @@ function extractBookingData(item) {
         roomTypes: roomTypes,
     };
 }
+
 
 module.exports = {
     extractBookingData,
