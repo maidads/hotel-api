@@ -121,4 +121,10 @@ functions:
       - http:
           path: retrive-bookings/
           method: GET
-   
+
+  getBookingIds:
+    handler: functions/getBookingIds/index.handler
+    events:
+      - http:
+          path: booking-ids
+          method: GET
