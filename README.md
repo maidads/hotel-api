@@ -66,13 +66,13 @@ Error: If not enough room for guests you get a error specifing not enough rooms 
 | `startDate`| String | Check-in date in `yyyy-mm-dd` format        |
 | `endDate`  | String | Check-out date in `yyyy-mm-dd` format       |
 | `rooms`    | Array  | An array of room objects to be booked, one object is required       |
-| `guests`    | Integer  | How many guests this booking is for       |
+| `guests`    | Integer  | Number of guests                         |
 #### Room Object Structure
 
 | Field      | Type    | Description                                         |
 |------------|---------|-----------------------------------------------------|
 | `type`     | String  | Room type (`single`, `double`, `suite`)             |
-| `quantity` | Integer | Number of guests                                    |
+| `quantity` | Integer | Number of rooms of the type.                        |
 
 #### Example Request
 ```plaintext
