@@ -99,6 +99,34 @@ Followed buy a specifikations of how many rooms, what types, number of bed and p
     ]
 }
 ```
+### 3. Retrieve Booking Details
+- **Endpoint**: /booking/{id}
+- **Method**: `GET`
+- **Description**: Retrieves the details of a specific booking by its ID.
 
+#### Path Parameter
 
+| Field      | Type    | Description                      |
+|------------|---------|----------------------------------|
+| `id`       | String  | The unique ID of the booking     |
 
+#### Example Request
+```plaintext
+GET /booking/ID12345
+```
+
+#### Example Response
+```plaintext
+{
+  "bookingId": "ID12345",
+  "name": "John Doe",
+  "email": "john@example.com",
+  "startDate": "2024-12-24",
+  "endDate": "2024-12-25",
+  "rooms": [
+    { "type": "single", "quantity": 2 },
+    { "type": "double", "quantity": 1 }
+  ],
+  "totalPrice": 4000
+}
+```
