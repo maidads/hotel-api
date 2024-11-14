@@ -17,22 +17,23 @@ https://e7kbb8tatb.execute-api.eu-north-1.amazonaws.com/dev
 
 #### Query Parameters
 
-| Parameter | Type    | Description                                     |
-|-----------|---------|-------------------------------------------------|
-| `guests`  | Integer | Number of guests                                |
-| `startDate` | String | Check-in date in `yyyy-mm-dd` format            |
-| `endDate`   | String | Check-out date in `yyyy-mm-dd` format           |
+| Parameter   | Type    | Description                                     |
+|-------------|---------|-------------------------------------------------|
+| `guests`    | Integer | Number of guests                                |
+| `startDate` | String  | Check-in date in `yyyy-mm-dd` format            |
+| `endDate`   | String  | Check-out date in `yyyy-mm-dd` format           |
 
 #### Example Request
 ```plaintext
 GET /search-rooms?guests=2&startDate=2024-11-01&endDate=2024-11-02
 ```
 
+#### Example Response
+
 Response: Message is either "Rooms retrieved successfully.” Or  "message": "Not enough rooms available”
 
 Followed buy a specifikations of how many rooms, what types, number of bed and price per night.
-
-
+```plaintext
 {
     "message": "Rooms retrieved successfully.",
     "rooms": {
@@ -53,26 +54,32 @@ Followed buy a specifikations of how many rooms, what types, number of bed and p
         }
     }
 }
+```
 
+### 2. Book Rooms
+- **Endpoint**: `/book-rooms`
+- **Method**: `POST`
+- **Description**: Creates a booking for specific room types over a date range.
 
-End point: /book-rooms
+#### Required JSON object in body
 
-Required Json object in body
-Fields:
-name: Name of guest
-email: email to guest
-startDate: The day the guest arrives
-endDate: The day the guest checks out
+| Field      | Type   | Description                                 |
+|------------|--------|---------------------------------------------|
+| `name`     | String | Guest's name                                |
+| `email`    | String | Guest's email address                       |
+| `startDate`| String | Check-in date in `yyyy-mm-dd` format        |
+| `endDate`  | String | Check-out date in `yyyy-mm-dd` format       |
+| `rooms`    | Array  | An array of room objects to be booked, one object is required       |
 
-rooms: A array of room objects to book. One object is required
+#### Room Object Structure
 
-roomObject: {
-		“type”: What type of room it is single, double, suit are the options
-		“quantity” How many of the type of room to book 
-		
-	}
+| Field      | Type    | Description                                         |
+|------------|---------|-----------------------------------------------------|
+| `type`     | String  | Room type (`single`, `double`, `suite`)             |
+| `quantity` | Integer | Number of rooms of this type to book                |
 
-Example object
+#### Example object
+```plaintext
 {
     "name": "Jöns",
     "email": "jans@jans.com",
@@ -91,3 +98,7 @@ Example object
     
     ]
 }
+```
+
+
+
