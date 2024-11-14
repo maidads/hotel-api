@@ -75,7 +75,7 @@ function createTransactionItemsForRooms(roomsPerDateList, subtractRooms) {
 
         const { date, rooms } = roomsPerDate;
 
-        const updatesAndValues = getUpdateExpressionAndExpressionValuesForRoomUpdates(rooms, true);
+        const updatesAndValues = getUpdateExpressionAndExpressionValuesForRoomUpdates(rooms, subtractRooms);
         const {updateExpression, expressionAttributeValues} = updatesAndValues;
         const conditionExpression = subtractRooms ? getConditionExpretionsForRoomAvailability(rooms) : undefined;
        // const conditionExpression = getConditionExpretionsForRoomAvailability(rooms);
