@@ -30,31 +30,27 @@ GET /search-rooms?guests=2&startDate=2024-11-01&endDate=2024-11-02
 
 #### Example Response
 
-Response: Message is either "Rooms retrieved successfully.” Or  "message": "Not enough rooms available”
-
-Followed buy a specifikations of how many rooms, what types, number of bed and price per night.
+Response: A specifikations of how many rooms, what types, number of bed and price per night.
 ```plaintext
-{
-    "message": "Rooms retrieved successfully.",
-    "rooms": {
-        "Single": {
-            "beds": 1,
-            "pricePerNight": 1000,
-            "availability": 1
-        },
-        "Double": {
-            "beds": 2,
-            "pricePerNight": 1500,
-            "availability": 10
-        },
-        "Suit": {
-            "beds": 2,
-            "pricePerNight": 1800,
-            "availability": 3
-        }
+{ 
+    "Single": {
+        "beds": 1,
+        "pricePerNight": 1000,
+        "availability": 1
+    },
+    "Double": {
+        "beds": 2,
+        "pricePerNight": 1500,
+        "availability": 10
+    },
+    "Suit": {
+        "beds": 2,
+        "pricePerNight": 1800,
+        "availability": 3
     }
 }
 ```
+Error: If not enough room for guests you get a error specifing not enough rooms available.
 
 ### 2. Book Rooms
 - **Endpoint**: `/book-rooms`
@@ -70,13 +66,13 @@ Followed buy a specifikations of how many rooms, what types, number of bed and p
 | `startDate`| String | Check-in date in `yyyy-mm-dd` format        |
 | `endDate`  | String | Check-out date in `yyyy-mm-dd` format       |
 | `rooms`    | Array  | An array of room objects to be booked, one object is required       |
-
+| `guests`    | Integer  | How many guests this booking is for       |
 #### Room Object Structure
 
 | Field      | Type    | Description                                         |
 |------------|---------|-----------------------------------------------------|
 | `type`     | String  | Room type (`single`, `double`, `suite`)             |
-| `quantity` | Integer | Number of rooms of this type to book                |
+| `quantity` | Integer | Number of guests                                    |
 
 #### Example Request
 ```plaintext
