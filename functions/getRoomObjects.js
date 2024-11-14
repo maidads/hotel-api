@@ -20,7 +20,7 @@ module.exports.getRoomObjects = async (startDate, endDate) => {
     try {
         
         const data = await dynamoDb.send(new QueryCommand(params));
-        console.log("Raw data fetched from DynamoDB:", data.Items);
+//        console.log("Raw data fetched from DynamoDB:", data.Items);
 
        
         if (!data.Items || data.Items.length === 0) {
@@ -30,7 +30,7 @@ module.exports.getRoomObjects = async (startDate, endDate) => {
 
        
         const rooms = data.Items.map(item => unmarshall(item));
-        console.log("Unmarshalled rooms:", rooms);
+        //console.log("Unmarshalled rooms:", rooms);
 
         return rooms;
     } catch (error) {
