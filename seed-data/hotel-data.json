@@ -1,7 +1,7 @@
 [
     {
       "PK": "ROOMS",
-      "SK": "2024-11-01",
+      "SK": "2024-12-01",
       "Rooms": [
         {"Type": "Single", "Beds": 1, "Price": 1000, "Availability": 7, "Bookings": [] },
         { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 3, "Bookings": [] },
@@ -11,7 +11,7 @@
     },
     {
       "PK": "ROOMS",
-      "SK": "2024-11-02",
+      "SK": "2024-12-02",
       "Rooms": [
         {"Type": "Single", "Beds": 1, "Price": 1000, "Availability": 7, "Bookings": [] },
         { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 3, "Bookings": [] },
@@ -56,16 +56,16 @@
         "BookingID": "001",
         "NumberOfGuests": 1,
         "Rooms": [
-        { "Type": "Single", "Price": 1000 }
+        { "Type": "Single", "Price": 1000, "Quantity": 1 }
         ]
     },
     {
         "PK": "Booking#002",
-        "SK": "2024-11-02",
+        "SK": "2024-12-02",
         "Name": "Alice Smith",
         "Email": "alice.smith@example.com",
-        "StartDate": "2024-11-02",
-        "EndDate": "2024-11-04",
+        "StartDate": "2024-12-02",
+        "EndDate": "2024-12-04",
         "BookingID": "002",
         "NumberOfGuests": 2,
         "Rooms": [

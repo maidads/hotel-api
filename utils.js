@@ -9,5 +9,7 @@ function getBookingIds(bookings) {
     return Array.from(uniqueIds);
 }
 
+
+
 //const bookingIds = getBookingIds(bookings);
 //console.log(bookingIds);
