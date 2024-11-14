@@ -177,18 +177,19 @@ PUT /booking/ID12345
 ```
 
 ### 5. Cancel a Booking
-- **Endpoint**: `/cancel-booking/{id}`
+- **Endpoint**: `/cancel-booking/{id}/{date}`
 - **Method**: `DELETE`
-- **Description**: Cancels a booking based on the booking ID.
+- **Description**: Cancels a booking based on the booking ID and date.
 
 #### Path Parameter
 | Parameter  | Type    | Description                      |
 |------------|---------|----------------------------------|
 | `id`       | String  | Booking ID to cancel             |
+| `date`     | String  | Date of booking to cancel        |
 
 #### Example Request
 ```plaintext
-DELETE /cancel-booking/ID12345
+DELETE /cancel-booking/ID12345/2024-12-25
 ```
 
 #### Example Response
@@ -199,10 +200,10 @@ DELETE /cancel-booking/ID12345
 }
 ```
 
-### 6. Retrieve Bookings
+### 6. Retrieve All Bookings
 - **Endpoint**: `/retrive-bookings/`
 - **Method**: `GET`
-- **Description**: Retrieves all bookings, possibly with filters or for a specific user.
+- **Description**: Retrieves all bookings.
 
 #### Example Request
 ```plaintext
