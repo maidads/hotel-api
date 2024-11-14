@@ -105,7 +105,6 @@ Followed buy a specifikations of how many rooms, what types, number of bed and p
 - **Description**: Retrieves the details of a specific booking by its ID.
 
 #### Path Parameter
-
 | Field      | Type    | Description                      |
 |------------|---------|----------------------------------|
 | `id`       | String  | The unique ID of the booking     |
@@ -128,5 +127,46 @@ GET /booking/ID12345
     { "type": "double", "quantity": 1 }
   ],
   "totalPrice": 4000
+}
+```
+
+### 4. Update a Booking
+- **Endpoint**: /booking/{id}
+- **Method**: `PUT`
+- **Description**: Updates the details of an existing booking.
+
+#### Path Parameter
+| Field      | Type    | Description                      |
+|------------|---------|----------------------------------|
+| `id`       | String  | The unique ID of the booking     |
+
+#### Request Body JSON
+| Field      | Type   | Description                                 |
+|------------|--------|---------------------------------------------|
+| `name`     | String | Guest's name                                |
+| `email`    | String | Guest's email address                       |
+| `startDate`| String | New check-in date                           |
+| `endDate`  | String | New check-out date                          |
+| `rooms`    | Array  | New array of room objects                   |
+
+#### Example Request
+```plaintext
+PUT /booking/ID12345
+```
+
+#### Example Response
+```plaintext
+{
+  "message": "Booking updated successfully",
+  "updatedDetails": {
+    "bookingId": "ID12345",
+    "startDate": "2024-12-26",
+    "endDate": "2024-12-28",
+    "rooms": [
+      { "type": "single", "quantity": 1 },
+      { "type": "suite", "quantity": 1 }
+    ],
+    "totalPrice": 5000
+  }
 }
 ```
