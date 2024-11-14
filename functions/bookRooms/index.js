@@ -15,11 +15,11 @@ module.exports.handler = async (event, context) => {
     const bookingData = getBodyJson(event);
 
     if (bookingData.error) {
-        return createErrorResponse(bookingData.error)
+        return createErrorResponse(bookingData.error, 400)
     }
     const validData = validateBookingData(bookingData);
     if (!validData.valid){
-        return createErrorResponse(validData.message)
+        return createErrorResponse(validData.message, 400)
     }
     const rooms = await getRoomObjects(bookingData.startDate, bookingData.endDate);
 
@@ -38,7 +38,7 @@ module.exports.handler = async (event, context) => {
     const bookingOBJ = getBookingOBJ(bookingData, rooms[0])
     const result = (await bookRooms(bookingsPerDate, bookingOBJ));
     if (!result.success) {
-        return createErrorResponse("Not enough rooms available.")
+        return createErrorResponse("Not enough rooms available.", 400)
 
     } else {
         const nights = dateList.length-1
