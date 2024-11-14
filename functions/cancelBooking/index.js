@@ -27,7 +27,6 @@ module.exports.handler = async (event, context) => {
 
     const getResult = await dynamoDb.send(getCommand);
 
-    // console.log(getResult);
     if (!getResult.Item) {
       return {
         statusCode: 404,
@@ -56,7 +55,7 @@ module.exports.handler = async (event, context) => {
         TransactItems: transactItems,
     };
     try {
-      console.log("Woks?")
+ 
       await dynamoDb.send(new TransactWriteItemsCommand(trasactParams));
       return createSuccessResponse(`Booking ${bookingId} canceled successfully`)
    
@@ -75,8 +74,6 @@ module.exports.handler = async (event, context) => {
 };
 
 const getTransactItems = (bookingData, dates) => {
-  console.log("Booking Data:", bookingData);
-  console.log("dates:", dates);
   const roomsPerDateList = createBookingDataForDates(bookingData, dates)
 
   const transactItems = createTransactionItemsForRooms(roomsPerDateList, false)

@@ -7,8 +7,6 @@ const {validateBookingData} = require('../validateBookingData');
 const {getBodyJson} = require('../getBodyJson');
 const { generateDateRange} =require('../../utils/generateDateRange');
 const { createErrorResponse, createSuccessResponse } = require('../../utils/responses');
-const {getConditionExpretionsForRoomAvailability} = require('../../utils/dynamodbHelpers')
-const {getUpdateExpressionAndExpressionValuesForRoomUpdates} = require('../../utils/dynamodbHelpers')
 const {createTransactionItemsForRooms} = require('../../utils/dynamodbHelpers');
 
 
@@ -96,33 +94,9 @@ const createRoomObjectsInDb = async (dates) => {
 }
 
 const bookRooms = async (roomsPerDateList, bookingOBJ) => {
-    console.log("Booking data",roomsPerDateList);
-    console.log("Booking OBJ",bookingOBJ);
+
     const transactItems = createTransactionItemsForRooms(roomsPerDateList, true)
-    // const transactItems = roomsPerDateList.map(roomsPerDate => {
 
-    //     const { date, rooms } = roomsPerDate;
-
-    //     const updatesAndValues = getUpdateExpressionAndExpressionValuesForRoomUpdates(rooms, true);
-    //     const {updateExpression, expressionAttributeValues} = updatesAndValues;
-    //     const conditionExpression = getConditionExpretionsForRoomAvailability(rooms);
-
-    //     const updateParams = {
-    //         Update: {
-    //             TableName: "HotelTable",
-    //             Key: {
-    //                 PK: { S: 'ROOMS' },
-    //                 SK: { S: date },
-    //             },
-    //             UpdateExpression: 'SET ' + updateExpression.join(', '),
-    //             ExpressionAttributeValues: expressionAttributeValues,
-    //             ConditionExpression: conditionExpression,
-    //         }
-    //     };
-
-
-    //     return updateParams;
-    // });
     const bookingParam = getPutParamsForBooking(bookingOBJ)
     transactItems.push(bookingParam);
 
@@ -138,12 +112,6 @@ const bookRooms = async (roomsPerDateList, bookingOBJ) => {
         return { success: false, error: error };
     }
 };
-
-
-// function roomTypeIndex(type) {
-//     const roomTypes = ["single", "double", "suit"]; // Rumtyper i samma ordning som i DynamoDB-dokumentet
-//     return roomTypes.indexOf(type);
-// }
 
 
 const getNewRoomObjectForDate = (date) => {
