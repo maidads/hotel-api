@@ -7,6 +7,9 @@ const {validateBookingData} = require('../validateBookingData');
 const {getBodyJson} = require('../getBodyJson');
 const { generateDateRange} =require('../../utils/generateDateRange');
 const { createErrorResponse, createSuccessResponse } = require('../../utils/responses');
+const {getConditionExpretionsForRoomAvailability} = require('../../utils/dynamodbHelpers')
+const {getUpdateExpressionAndExpressionValuesForRoomUpdates} = require('../../utils/dynamodbHelpers')
+const {createTransactionItemsForRooms} = require('../../utils/dynamodbHelpers');
 
 
 module.exports.handler = async (event, context) => {
@@ -92,48 +95,34 @@ const createRoomObjectsInDb = async (dates) => {
     }
 }
 
-const bookRooms = async (bookingData, bookingOBJ) => {
+const bookRooms = async (roomsPerDateList, bookingOBJ) => {
+    console.log("Booking data",roomsPerDateList);
+    console.log("Booking OBJ",bookingOBJ);
+    const transactItems = createTransactionItemsForRooms(roomsPerDateList, true)
+    // const transactItems = roomsPerDateList.map(roomsPerDate => {
 
-    const transactItems = bookingData.map(booking => {
+    //     const { date, rooms } = roomsPerDate;
 
-        const { date, rooms } = booking;
-        const updateExpression = [];
-        const expressionAttributeValues = {};
+    //     const updatesAndValues = getUpdateExpressionAndExpressionValuesForRoomUpdates(rooms, true);
+    //     const {updateExpression, expressionAttributeValues} = updatesAndValues;
+    //     const conditionExpression = getConditionExpretionsForRoomAvailability(rooms);
 
-        rooms.forEach(room => {
-            const { type, quantity } = room;
-
-            // Lägg till uttryck för varje rumstyp
-            const typeIndex = roomTypeIndex(type);  // Får index för rumstypen i Rooms-arrayen
-
-            updateExpression.push(`Rooms[${typeIndex}].Availability = Rooms[${typeIndex}].Availability - :${type}`);
-            expressionAttributeValues[`:${type}`] = { N: quantity.toString() };
-        });
-
-        const conditionExpressionParts = rooms.map(room => {
-
-            const typeIndex = roomTypeIndex(room.type);
-
-            return `Rooms[${typeIndex}].Availability >= :${room.type}`;
-        });
-        const conditionExpression = conditionExpressionParts.join(' AND ');
-
-        const updateParams = {
-            Update: {
-                TableName: "HotelTable",
-                Key: {
-                    PK: { S: 'ROOMS' },
-                    SK: { S: date },
-                },
-                UpdateExpression: 'SET ' + updateExpression.join(', '),
-                ExpressionAttributeValues: expressionAttributeValues,
-                ConditionExpression: conditionExpression,
-            }
-        };
+    //     const updateParams = {
+    //         Update: {
+    //             TableName: "HotelTable",
+    //             Key: {
+    //                 PK: { S: 'ROOMS' },
+    //                 SK: { S: date },
+    //             },
+    //             UpdateExpression: 'SET ' + updateExpression.join(', '),
+    //             ExpressionAttributeValues: expressionAttributeValues,
+    //             ConditionExpression: conditionExpression,
+    //         }
+    //     };
 
 
-        return updateParams;
-    });
+    //     return updateParams;
+    // });
     const bookingParam = getPutParamsForBooking(bookingOBJ)
     transactItems.push(bookingParam);
 
@@ -151,10 +140,10 @@ const bookRooms = async (bookingData, bookingOBJ) => {
 };
 
 
-function roomTypeIndex(type) {
-    const roomTypes = ["single", "double", "suit"]; // Rumtyper i samma ordning som i DynamoDB-dokumentet
-    return roomTypes.indexOf(type);
-}
+// function roomTypeIndex(type) {
+//     const roomTypes = ["single", "double", "suit"]; // Rumtyper i samma ordning som i DynamoDB-dokumentet
+//     return roomTypes.indexOf(type);
+// }
 
 
 const getNewRoomObjectForDate = (date) => {

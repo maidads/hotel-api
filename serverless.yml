@@ -121,4 +121,4 @@ functions:
       - http:
           path: retrive-bookings/
           method: GET
-   
+
