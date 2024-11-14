@@ -78,6 +78,11 @@ Followed buy a specifikations of how many rooms, what types, number of bed and p
 | `type`     | String  | Room type (`single`, `double`, `suite`)             |
 | `quantity` | Integer | Number of rooms of this type to book                |
 
+#### Example Request
+```plaintext
+POST /book-rooms
+```
+
 #### Example object
 ```plaintext
 {
@@ -100,7 +105,7 @@ Followed buy a specifikations of how many rooms, what types, number of bed and p
 }
 ```
 ### 3. Retrieve Booking Details
-- **Endpoint**: /booking/{id}
+- **Endpoint**: `/booking/{id}`
 - **Method**: `GET`
 - **Description**: Retrieves the details of a specific booking by its ID.
 
@@ -131,12 +136,12 @@ GET /booking/ID12345
 ```
 
 ### 4. Update a Booking
-- **Endpoint**: /booking/{id}
+- **Endpoint**: `/booking/{id}`
 - **Method**: `PUT`
 - **Description**: Updates the details of an existing booking.
 
 #### Path Parameter
-| Field      | Type    | Description                      |
+| Parameter  | Type    | Description                      |
 |------------|---------|----------------------------------|
 | `id`       | String  | The unique ID of the booking     |
 
@@ -169,4 +174,37 @@ PUT /booking/ID12345
     "totalPrice": 5000
   }
 }
+```
+
+### 5. Cancel a Booking
+- **Endpoint**: `/cancel-booking/{id}`
+- **Method**: `DELETE`
+- **Description**: Cancels a booking based on the booking ID.
+
+#### Path Parameter
+| Parameter  | Type    | Description                      |
+|------------|---------|----------------------------------|
+| `id`       | String  | Booking ID to cancel             |
+
+#### Example Request
+```plaintext
+DELETE /cancel-booking/ID12345
+```
+
+#### Example Response
+```plaintext
+{
+  "message": "Booking canceled successfully",
+  "bookingId": "ID12345"
+}
+```
+
+### 6. Retrieve Bookings
+- **Endpoint**: `/retrive-bookings/`
+- **Method**: `GET`
+- **Description**: Retrieves all bookings, possibly with filters or for a specific user.
+
+#### Example Request
+```plaintext
+GET /retrive-bookings/
 ```
