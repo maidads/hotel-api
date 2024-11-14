@@ -38,7 +38,75 @@ function buildKeyConditionExpression(bookingId) {
     };
 }
 
+function getConditionExpretionsForRoomAvailability(rooms) {
+    const conditionExpressionParts = rooms.map(room => {
+
+        const typeIndex = roomTypeIndex(room.type);
+
+        return `Rooms[${typeIndex}].Availability >= :${room.type}`;
+    });
+    const conditionExpression = conditionExpressionParts.join(' AND ');
+    return conditionExpression;
+}
+function roomTypeIndex(type) {
+    const roomTypes = ["single", "double", "suit"]; // Rumtyper i samma ordning som i DynamoDB-dokumentet
+    return roomTypes.indexOf(type.toLowerCase());
+}
+
+function getUpdateExpressionAndExpressionValuesForRoomUpdates(rooms, subtractRooms) {
+    const updateExpression = [];
+    const expressionAttributeValues = {};
+
+    rooms.forEach(room => {
+        const { type, quantity } = room;
+
+        // Lägg till uttryck för varje rumstyp
+        const typeIndex = roomTypeIndex(type);  // Får index för rumstypen i Rooms-arrayen
+        const operator = subtractRooms ? '-' : '+';
+
+        updateExpression.push(`Rooms[${typeIndex}].Availability = Rooms[${typeIndex}].Availability ${operator} :${type}`);
+        expressionAttributeValues[`:${type}`] = { N: quantity.toString() };
+    });
+    return{updateExpression: updateExpression, expressionAttributeValues: expressionAttributeValues}
+}
+
+function createTransactionItemsForRooms(roomsPerDateList, subtractRooms) {
+    const transactItems = roomsPerDateList.map(roomsPerDate => {
+
+        const { date, rooms } = roomsPerDate;
+
+        const updatesAndValues = getUpdateExpressionAndExpressionValuesForRoomUpdates(rooms, true);
+        const {updateExpression, expressionAttributeValues} = updatesAndValues;
+        const conditionExpression = subtractRooms ? getConditionExpretionsForRoomAvailability(rooms) : undefined;
+       // const conditionExpression = getConditionExpretionsForRoomAvailability(rooms);
+
+        const updateParams = {
+            Update: {
+                TableName: "HotelTable",
+                Key: {
+                    PK: { S: 'ROOMS' },
+                    SK: { S: date },
+                },
+                UpdateExpression: 'SET ' + updateExpression.join(', '),
+                ExpressionAttributeValues: expressionAttributeValues,
+               
+            }
+        };
+        if (conditionExpression) {
+            updateParams.Update.ConditionExpression = conditionExpression;
+        }
+
+
+        return updateParams;
+    });
+    return transactItems;
+}
+
+
 module.exports = {
     buildFilterExpression,
     buildKeyConditionExpression,
+    getConditionExpretionsForRoomAvailability,
+    getUpdateExpressionAndExpressionValuesForRoomUpdates,
+    createTransactionItemsForRooms,
 };
