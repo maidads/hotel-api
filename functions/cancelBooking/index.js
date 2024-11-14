@@ -57,7 +57,8 @@ module.exports.handler = async (event, context) => {
     try {
  
       await dynamoDb.send(new TransactWriteItemsCommand(trasactParams));
-      return createSuccessResponse(`Booking ${bookingId} canceled successfully`)
+     // return createSuccessResponse(`Booking ${bookingId} canceled successfully`)
+     return createSuccessResponse({message: `Booking canceled successfully`, bookingId: bookingId})
    
     } catch (error) {
       console.log(error)

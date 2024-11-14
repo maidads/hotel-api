@@ -4,7 +4,7 @@ const { createErrorResponse, createSuccessResponse } = require('../../utils/resp
 module.exports.handler = async (event, context) => {
     const { guests, startDate, endDate } = event.queryStringParameters || {};
     if (!guests || !startDate || !endDate) {
-        return createErrorResponse("Missing required query parameters: guests, startDate, and endDate are all required.")
+        return createErrorResponse("Missing required query parameters: guests, startDate, and endDate are all required.", 400)
     }
 
     try {
@@ -26,13 +26,13 @@ module.exports.handler = async (event, context) => {
 
         const beds = getNrOfBedsFree(lowestAvailabilityByRoomType);
         if (guests > beds){
-            return createErrorResponse("Not enough rooms available.");
+            return createErrorResponse("Not enough rooms available.", 400);
         }
             return createSuccessResponse(lowestAvailabilityByRoomType);
 
     } catch (error) {
         console.error('Error querying rooms:', error);
-        return createErrorResponse("Error querying rooms")
+        return createErrorResponse("Error querying rooms", 503)
     }
 }
 
