@@ -9,15 +9,15 @@ function buildFilterExpression(queryParams) {
 
     if (queryParams.startDate && queryParams.endDate) {
         filterExpressions.push("#startDate >= :startDate AND #endDate <= :endDate");
-        expressionAttributeNames["#startDate"] = "StartDate";
-        expressionAttributeNames["#endDate"] = "EndDate";
+        expressionAttributeNames["#startDate"] = "startDate";
+        expressionAttributeNames["#endDate"] = "endDate";
         expressionAttributeValues[":startDate"] = { S: queryParams.startDate };
         expressionAttributeValues[":endDate"] = { S: queryParams.endDate };
     }
 
     if (queryParams.name) {
         filterExpressions.push("contains(#name, :name)");
-        expressionAttributeNames["#name"] = "Name";
+        expressionAttributeNames["#name"] = "name";
         expressionAttributeValues[":name"] = { S: queryParams.name };
     }
 
@@ -43,7 +43,7 @@ function getConditionExpretionsForRoomAvailability(rooms) {
 
         const typeIndex = roomTypeIndex(room.type);
 
-        return `Rooms[${typeIndex}].Availability >= :${room.type}`;
+        return `rooms[${typeIndex}].availability >= :${room.type}`;
     });
     const conditionExpression = conditionExpressionParts.join(' AND ');
     return conditionExpression;
@@ -64,7 +64,7 @@ function getUpdateExpressionAndExpressionValuesForRoomUpdates(rooms, subtractRoo
         const typeIndex = roomTypeIndex(type);  // Får index för rumstypen i Rooms-arrayen
         const operator = subtractRooms ? '-' : '+';
 
-        updateExpression.push(`Rooms[${typeIndex}].Availability = Rooms[${typeIndex}].Availability ${operator} :${type}`);
+        updateExpression.push(`rooms[${typeIndex}].availability = rooms[${typeIndex}].availability ${operator} :${type}`);
         expressionAttributeValues[`:${type}`] = { N: quantity.toString() };
     });
     return{updateExpression: updateExpression, expressionAttributeValues: expressionAttributeValues}

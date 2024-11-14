@@ -42,15 +42,15 @@ module.exports.handler = async (event, context) => {
 
     } else {
         const nights = dateList.length-1
-        const total = getTotalPrice(bookingOBJ.Rooms, nights) 
+        const total = getTotalPrice(bookingOBJ.rooms, nights) 
 
         const bookingDetails = {
-            bookingnr: bookingOBJ.BookingID,
-            guest: bookingOBJ.NumberOfGuests,
-            rooms: bookingOBJ.Rooms,
-            checkInDate: bookingOBJ.StartDate,
-            checkOutDate: bookingOBJ.EndDate,
-            name: bookingOBJ.Name,
+            bookingnr: bookingOBJ.bookingID,
+            guest: bookingOBJ.numberOfGuests,
+            rooms: bookingOBJ.rooms,
+            checkInDate: bookingOBJ.startDate,
+            checkOutDate: bookingOBJ.endDate,
+            name: bookingOBJ.name,
             totalPrice: total
         }
 
@@ -118,10 +118,10 @@ const getNewRoomObjectForDate = (date) => {
     return newRoom = {
         "PK": "ROOMS",
         "SK": date,
-        "Rooms": [
-            { "Type": "Single", "Beds": 1, "Price": 1000, "Availability": 2, "Bookings": [] },
-            { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 15, "Bookings": [] },
-            { "Type": "Suit", "Beds": 3, "Price": 1800, "Availability": 3, "Bookings": [] }
+        "rooms": [
+            { "type": "single", "beds": 1, "price": 1000, "availability": 2, "bookings": [] },
+            { "type": "double", "beds": 2, "price": 1500, "availability": 15, "bookings": [] },
+            { "type": "suit", "beds": 3, "price": 1800, "availability": 3, "bookings": [] }
         ]
     }
 }
@@ -133,17 +133,17 @@ const getBookingOBJ = (bookingData, room) => {
     }
     var prices = {
     }
-    room.Rooms.forEach(type => {
-        prices[type.Type.toLowerCase()] = type.Price
+    room.rooms.forEach(type => {
+        prices[type.type.toLowerCase()] = type.price
     })
 
     const bookedRooms = []
     bookingData.rooms.forEach(type => {
 
         const bookedType = {
-            Type: capitalize(type.type),
-            Quantity: type.quantity,
-            Price: prices[type.type]
+            type: type.type,
+            quantity: type.quantity,
+            price: prices[type.type]
         }
         bookedRooms.push(bookedType);
     })
@@ -151,13 +151,13 @@ const getBookingOBJ = (bookingData, room) => {
     const bookingOBJ = {
         "PK": `Booking#${id}`,
         "SK": bookingData.startDate,
-        BookingID: id,
-        Name: bookingData.name,
-        Email: bookingData.email,
-        NumberOfGuests: bookingData.guests,
-        StartDate: bookingData.startDate,
-        EndDate: bookingData.endDate,
-        Rooms: bookedRooms
+        bookingID: id,
+        name: bookingData.name,
+        email: bookingData.email,
+        numberOfGuests: bookingData.guests,
+        startDate: bookingData.startDate,
+        endDate: bookingData.endDate,
+        rooms: bookedRooms
     }
     return bookingOBJ;
 
@@ -180,7 +180,7 @@ const getPutParamsForBooking = (bookingOBJ) => {
 const getTotalPrice = (rooms, nights) => {
     var total = 0
     rooms.forEach(room => {
-        total += (room.Quantity * room.Price)
+        total += (room.quantity * room.price)
     })
     return (total * nights)
 }

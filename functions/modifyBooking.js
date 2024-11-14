@@ -26,10 +26,10 @@ module.exports.handler = async (event) => {
     }
 
     const totalCapacity = data.roomTypes.reduce((sum, room) => {
-      const roomType = room.Type || room.type;
-      if (roomType === "Single") return sum + room.count * 1;
-      if (roomType === "Double") return sum + room.count * 2;
-      if (roomType === "Suite") return sum + room.count * 3;
+      const roomType = room.type || room.type;
+      if (roomType === "single") return sum + room.count * 1;
+      if (roomType === "double") return sum + room.count * 2;
+      if (roomType === "suite") return sum + room.count * 3;
       return sum;
     }, 0);
 
@@ -73,12 +73,12 @@ module.exports.handler = async (event) => {
     const newItem = {
       PK: `Booking#${data.bookingId}`,
       SK: data.checkInDate,
-      BookingID: data.bookingId,
-      Name: data.guestName,
-      StartDate: data.checkInDate,
-      EndDate: data.checkOutDate,
-      Rooms: data.roomTypes,
-      NumberOfGuests: data.numberOfGuests,
+      bookingID: data.bookingId,
+      name: data.guestName,
+      startDate: data.checkInDate,
+      endDate: data.checkOutDate,
+      rooms: data.roomTypes,
+      numberOfGuests: data.numberOfGuests,
     };
 
     await dynamoDb.send(
@@ -111,9 +111,9 @@ module.exports.handler = async (event) => {
 
 function checkAvailability(rooms, requestedRoomTypes) {
   for (const requested of requestedRoomTypes) {
-    const requestedType = requested.Type || requested.type;
+    const requestedType = requested.type || requested.type;
     const room = rooms.find((r) =>
-      r.Rooms.some((roomType) => (roomType.Type || roomType.type) === requestedType)
+      r.rooms.some((roomType) => (roomType.type || roomType.type) === requestedType)
     );
 
     if (!room) {
@@ -121,8 +121,8 @@ function checkAvailability(rooms, requestedRoomTypes) {
       return false;
     }
 
-    const availableRoom = room.Rooms.find(
-      (roomType) => (roomType.Type || roomType.type) === requestedType
+    const availableRoom = room.rooms.find(
+      (roomType) => (roomType.type || roomType.type) === requestedType
     );
     if (availableRoom.Availability < requested.count) {
       console.warn(

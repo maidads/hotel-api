@@ -14,9 +14,9 @@ module.exports.handler = async (event, context) => {
         if (rooms.length === 0 ){
             let newRooms = {
                 Rooms: [
-                    {"Type": "Single", "Beds": 1, "Price": 1000, "Availability": 2, "Bookings": [] },
-                    { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 15, "Bookings": [] },
-                    { "Type": "Suit", "Beds": 2, "Price": 1800, "Availability": 3, "Bookings": [] }
+                    {"type": "single", "beds": 1, "price": 1000, "availability": 2, "bookings": [] },
+                    { "type": "double", "beds": 2, "price": 1500, "availability": 15, "bookings": [] },
+                    { "type": "suit", "beds": 2, "price": 1800, "availability": 3, "bookings": [] }
                   ]
             }
             rooms.push(newRooms)
@@ -39,19 +39,19 @@ module.exports.handler = async (event, context) => {
 const getLowestAvailabilityByRoomType = (rooms) => {
     const lowestAvailabilityByRoomType = {};
     rooms.forEach(day => {
-        day.Rooms.forEach(roomType => {
-            const type = roomType.Type;
+        day.rooms.forEach(roomType => {
+            const type = roomType.type;
        
             if (!lowestAvailabilityByRoomType[type]) {
                 lowestAvailabilityByRoomType[type] = {
-                    beds: roomType.Beds,
-                    pricePerNight: roomType.Price,
-                    availability: roomType.Availability 
+                    beds: roomType.beds,
+                    pricePerNight: roomType.price,
+                    availability: roomType.availability 
                 };
             } else {
                
-                if (lowestAvailabilityByRoomType[type].availability > roomType.Availability) {
-                    lowestAvailabilityByRoomType[type].availability = roomType.Availability;
+                if (lowestAvailabilityByRoomType[type].availability > roomType.availability) {
+                    lowestAvailabilityByRoomType[type].availability = roomType.availability;
                 }
             }
         });
