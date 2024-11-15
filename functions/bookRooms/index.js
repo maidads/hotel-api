@@ -3,11 +3,11 @@ const dynamoDb = require('../../config/dynamodb');
 const { TransactWriteItemsCommand, BatchWriteItemCommand, PutItemCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
 const { getRoomObjects } = require('../getRoomObjects');
 const crypto = require('crypto');
-const {validateBookingData} = require('../validateBookingData');
-const {getBodyJson} = require('../getBodyJson');
-const { generateDateRange} =require('../../utils/generateDateRange');
+const { validateBookingData } = require('../validateBookingData');
+const { getBodyJson } = require('../getBodyJson');
+const { generateDateRange } = require('../../utils/generateDateRange');
 const { createErrorResponse, createSuccessResponse } = require('../../utils/responses');
-const {createTransactionItemsForRooms} = require('../../utils/dynamodbHelpers');
+const { createTransactionItemsForRooms } = require('../../utils/dynamodbHelpers');
 const { getRoomTypes } = require('../../utils/bookingHelpers');
 
 
@@ -19,7 +19,7 @@ module.exports.handler = async (event, context) => {
         return createErrorResponse(bookingData.error, 400)
     }
     const validData = validateBookingData(bookingData);
-    if (!validData.valid){
+    if (!validData.valid) {
         return createErrorResponse(validData.message, 400)
     }
     const rooms = await getRoomObjects(bookingData.startDate, bookingData.endDate);
@@ -42,8 +42,8 @@ module.exports.handler = async (event, context) => {
         return createErrorResponse("Not enough rooms available.", 400)
 
     } else {
-        const nights = dateList.length-1
-        const total = getTotalPrice(bookingOBJ.rooms, nights) 
+        const nights = dateList.length - 1
+        const total = getTotalPrice(bookingOBJ.rooms, nights)
 
         const bookingDetails = {
             bookingnr: bookingOBJ.bookingID,
@@ -125,7 +125,7 @@ const getNewRoomObjectForDate = (date) => {
 
 const getBookingOBJ = (bookingData, room) => {
 
-    if (room === undefined){
+    if (room === undefined) {
         room = getNewRoomObjectForDate("dosent matter")// just to get the room types
     }
     var prices = {
@@ -158,10 +158,6 @@ const getBookingOBJ = (bookingData, room) => {
     }
     return bookingOBJ;
 
-}
-function capitalize(str) {
-
-    return str[0].toUpperCase() + str.slice(1).toLowerCase();
 }
 
 const getPutParamsForBooking = (bookingOBJ) => {

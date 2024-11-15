@@ -11,8 +11,6 @@ provider:
   region: eu-north-1
   role: ${ssm:/for-class/iam/role}
  
-
-
 package:
   exclude:
     - node_modules/**
@@ -24,8 +22,6 @@ package:
     - "README.md"
     - ".env"
     - .dynamodb/**
-
-
 
 resources:
   Resources:

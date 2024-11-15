@@ -53,14 +53,14 @@ module.exports.handler = async (event, context) => {
 
     const transactItems = getTransactItems(booking, dateList)
     const trasactParams = {
-        TransactItems: transactItems,
+      TransactItems: transactItems,
     };
     try {
- 
+
       await dynamoDb.send(new TransactWriteItemsCommand(trasactParams));
-     // return createSuccessResponse(`Booking ${bookingId} canceled successfully`)
-     return createSuccessResponse({message: `Booking canceled successfully`, bookingId: bookingId})
-   
+      // return createSuccessResponse(`Booking ${bookingId} canceled successfully`)
+      return createSuccessResponse({ message: `Booking canceled successfully`, bookingId: bookingId })
+
     } catch (error) {
       console.log(error)
       return createErrorResponse(`Failed to delete ${bookingId}`)
@@ -96,12 +96,12 @@ const getTransactItems = (bookingData, dates) => {
 
 function createBookingDataForDates(bookingData, dates) {
   return dates.map(date => ({
-      date: date,
-      rooms: bookingData.rooms.map(room => ({
-          price: room.price,
-          quantity: room.quantity,
-          type: room.type
-      }))
+    date: date,
+    rooms: bookingData.rooms.map(room => ({
+      price: room.price,
+      quantity: room.quantity,
+      type: room.type
+    }))
   }));
 }
 
