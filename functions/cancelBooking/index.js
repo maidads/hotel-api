@@ -85,7 +85,7 @@ const getTransactItems = (bookingData, dates) => {
     Delete: {
       TableName: "HotelTable",
       Key: {
-        PK: { S: `Booking#${bookingData.BookingID}` },
+        PK: { S: `Booking#${bookingData.bookingID}` },
         SK: { S: bookingData.startDate }
       }
     }
