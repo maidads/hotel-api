@@ -62,6 +62,11 @@ module.exports.validateBookingData = (data) => {
     if (endDate.getTime() < startDate.getTime()) {
         return { valid: false, message: "End date cannot be before start date" };
     }
+    const dayDifference = (endDate - startDate) / (1000 * 60 * 60 * 24);
+
+    if (dayDifference > 20) {
+        return { valid: false, message: "Booking cannot exceed 20 days" };
+    }
 
     return { valid: true, message: "Booking data is valid" };
 }
