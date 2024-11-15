@@ -17,11 +17,11 @@ https://e7kbb8tatb.execute-api.eu-north-1.amazonaws.com/dev
 
 #### Query Parameters
 
-| Parameter   | Type    | Description                                     |
-|-------------|---------|-------------------------------------------------|
-| `guests`    | Integer | Number of guests                                |
-| `startDate` | String  | Check-in date in `yyyy-mm-dd` format            |
-| `endDate`   | String  | Check-out date in `yyyy-mm-dd` format           |
+| Parameter   | Type    | Description                                                     |
+|-------------|---------|-----------------------------------------------------------------|
+| `guests`    | Integer | Number of guests                                                |
+| `startDate` | String  | Check-in date in `yyyy-mm-dd` format                            |
+| `endDate`   | String  | Check-out date in `yyyy-mm-dd` format                           |
 
 #### Example Request
 ```plaintext
@@ -29,8 +29,6 @@ GET /search-rooms?guests=2&startDate=2024-11-01&endDate=2024-11-02
 ```
 
 #### Example Response
-
-Response: A specifikations of how many rooms, what types, number of bed and price per night.
 ```plaintext
 { 
     "Single": {
@@ -59,27 +57,27 @@ Error: If not enough room for guests you get a error specifing not enough rooms 
 
 #### Required JSON object in body
 
-| Field      | Type   | Description                                 |
-|------------|--------|---------------------------------------------|
-| `name`     | String | Guest's name                                |
-| `email`    | String | Guest's email address                       |
-| `startDate`| String | Check-in date in `yyyy-mm-dd` format        |
-| `endDate`  | String | Check-out date in `yyyy-mm-dd` format       |
-| `rooms`    | Array  | An array of room objects to be booked, one object is required       |
-| `guests`    | Integer  | Number of guests                         |
+| Field       | Type    | Description                                                     |
+|-------------|---------|-----------------------------------------------------------------|
+| `name`      | String  | Guest's name                                                    |
+| `email`     | String  | Guest's email address                                           |
+| `startDate` | String  | Check-in date in `yyyy-mm-dd` format                            |
+| `endDate`   | String  | Check-out date in `yyyy-mm-dd` format                           |
+| `rooms`     | Array   | An array of room objects to be booked                           |
+| `guests`    | Integer | Number of guests                                                |
 #### Room Object Structure
 
-| Field      | Type    | Description                                         |
-|------------|---------|-----------------------------------------------------|
-| `type`     | String  | Room type (`single`, `double`, `suite`)             |
-| `quantity` | Integer | Number of rooms of the type.                        |
+| Field       | Type    | Description                                                     |
+|-------------|---------|-----------------------------------------------------------------|
+| `type`      | String  | Room type (`single`, `double`, `suite`)                         |
+| `quantity`  | Integer | Number of rooms of the type.                                    |
 
 #### Example Request
 ```plaintext
 POST /book-rooms
 ```
 
-#### Example request object
+#### Example Request Body
 ```plaintext
 {
     "name": "Jöns",
@@ -96,79 +94,133 @@ POST /book-rooms
         "type": "double",
         "quantity": 1
         }
-    
     ]
 }
 ```
+#### Example Response
+```plaintext
+{
+    "bookingnr": "1c046e8d-7890-4bc9-a246-0342028f9c57",
+    "guest": 2,
+    "rooms": [
+        {
+            "type": "single",
+            "quantity": 1,
+            "price": 500
+        },
+        {
+            "type": "double",
+            "quantity": 1,
+            "price": 1000
+        }
+    ],
+    "checkInDate": "2024-12-30",
+    "checkOutDate": "2024-12-31",
+    "name": "Jäns",
+    "totalPrice": 1500
+}
+```
+
 ### 3. Retrieve Booking Details
-- **Endpoint**: `/booking/{id}`
+- **Endpoint**: `/retrive-bookings/`
 - **Method**: `GET`
-- **Description**: Retrieves the details of a specific booking by its ID.
+- **Description**: Retrieves all bookings.
 
 #### Path Parameter
-| Field      | Type    | Description                      |
-|------------|---------|----------------------------------|
-| `id`       | String  | The unique ID of the booking     |
+| Field      | Type    | Description                                                      |
+|------------|---------|------------------------------------------------------------------|
+| `id`       | String  | The unique ID of the booking                                     |
 
 #### Example Request
 ```plaintext
-GET /booking/ID12345
+GET /retrive-bookings/d48c6...
+```
+#### Query Parameters
+| Parameter   | Type    | Description                                                     |
+|-------------|---------|-----------------------------------------------------------------|
+| `bookingId` | String  | Filter bookings by the unique booking ID                        |
+| `name`      | String  | Filter bookings by the booker's name                            |
+| `roomType`  | String  | Filter bookings by room type (single, double, suite)            |
+| `startDate` | String  | Filter bookings that start on or after this date (yyyy-mm-dd)   |
+| `endDate`   | String  | Filter bookings that end on or before this date (yyyy-mm-dd)    |
+
+#### Example Request
+```plaintext
+GET /retrive-bookings?name=Alice Johnson
 ```
 
 #### Example Response
 ```plaintext
 {
-  "bookingId": "ID12345",
-  "name": "John Doe",
-  "email": "john@example.com",
-  "startDate": "2024-12-24",
-  "endDate": "2024-12-25",
-  "rooms": [
-    { "type": "single", "quantity": 2 },
+  "bookingNumber": "d48c6...",
+  "checkInDate": "2024-12-02",
+  "checkOutDate": "2024-12-08",
+  "numberOfGuests": 2,
+  "numberOfRooms": 1,
+  "bookerName": "Alice Johnson",
+  "roomTypes": [
     { "type": "double", "quantity": 1 }
   ],
-  "totalPrice": 4000
 }
 ```
 
 ### 4. Update a Booking
-- **Endpoint**: `/booking/{id}`
+- **Endpoint**: `/modify-booking`
 - **Method**: `PUT`
 - **Description**: Updates the details of an existing booking.
-
-#### Path Parameter
-| Parameter  | Type    | Description                      |
-|------------|---------|----------------------------------|
-| `id`       | String  | The unique ID of the booking     |
+- **Note**: This endpoint is currently in the development phase.
 
 #### Request Body JSON
-| Field      | Type   | Description                                 |
-|------------|--------|---------------------------------------------|
-| `name`     | String | Guest's name                                |
-| `email`    | String | Guest's email address                       |
-| `startDate`| String | New check-in date                           |
-| `endDate`  | String | New check-out date                          |
-| `rooms`    | Array  | New array of room objects                   |
+| Field                 | Type    | Description                                           |
+|-----------------------|---------|-------------------------------------------------------|
+| `bookingId`           | String  | The unique ID of the booking                          |
+| `guestName`           | String  | Guest's name                                          |
+| `originalCheckInDate` | String  | The original check-in date of the booking (yyyy-mm-dd)|
+| `checkInDate`         | String  | New check-in date (yyyy-mm-dd)                        |
+| `checkOutDate`        | String  | New check-out date (yyyy-mm-dd)                       |
+| `roomTypes`           | Array   | Array of room type objects to update                  |
+| `numberOfGuests`      | Integer | Total number of guests                                |
 
-#### Example Request
+Room Type Object Structure
+| Field                 | Type    | Description                                           |
+|-----------------------|---------|-------------------------------------------------------|
+| `type`                | String  | Room type (Single, Double, Suite)                     |
+| `count`               | Integer | Number of rooms of this type                          |
+
+
+#### Example Request Body
 ```plaintext
-PUT /booking/ID12345
+{
+  "bookingId": "015",
+  "guestName": "Alice",
+  "originalCheckInDate": "2024-12-02",
+  "checkInDate": "2024-12-02",
+  "checkOutDate": "2024-12-06",
+  "roomTypes": [ { "type": "Double", "count": 1 } ],
+  "numberOfGuests": 2
+}
 ```
 
 #### Example Response
 ```plaintext
 {
-  "message": "Booking updated successfully",
-  "updatedDetails": {
-    "bookingId": "ID12345",
-    "startDate": "2024-12-26",
-    "endDate": "2024-12-28",
-    "rooms": [
-      { "type": "single", "quantity": 1 },
-      { "type": "suite", "quantity": 1 }
-    ],
-    "totalPrice": 5000
-  }
+  "status": "success",
+    "message": "Booking successfully updated",
+    "updatedBooking": {
+        "PK": "Booking#015",
+        "SK": "2024-12-02",
+        "BookingID": "015",
+        "Name": "Alice",
+        "StartDate": "2024-12-02",
+        "EndDate": "2024-12-06",
+        "Rooms": [
+            {
+                "type": "Double",
+                "count": 1
+            }
+        ],
+        "NumberOfGuests": 2
+    }
 }
 ```
 
@@ -178,30 +230,21 @@ PUT /booking/ID12345
 - **Description**: Cancels a booking based on the booking ID and date.
 
 #### Path Parameter
-| Parameter  | Type    | Description                      |
-|------------|---------|----------------------------------|
-| `id`       | String  | Booking ID to cancel             |
-| `date`     | String  | Check-in date of booking to cancel        |
+| Parameter | Type    | Description                                                       |
+|-----------|---------|-------------------------------------------------------------------|
+| `id`      | String  | Booking ID to cancel                                              |
+| `date`    | String  | Check-in date of booking                                          |
 
 #### Example Request
 ```plaintext
-DELETE /cancel-booking/ID12345/2024-12-25
+DELETE /cancel-booking/d48c6.../2024-12-25
 ```
 
 #### Example Response
 ```plaintext
 {
   "message": "Booking canceled successfully",
-  "bookingId": "ID12345"
+  "bookingId": "d48c6..."
 }
 ```
 
-### 6. Retrieve All Bookings
-- **Endpoint**: `/retrive-bookings/`
-- **Method**: `GET`
-- **Description**: Retrieves all bookings.
-
-#### Example Request
-```plaintext
-GET /retrive-bookings/
-```
