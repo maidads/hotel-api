@@ -1,7 +1,7 @@
 const { getRoomObjects } = require('./getRoomObjects');
 const {
-  DeleteCommand,
   PutCommand,
+  GetCommand,
 } = require("@aws-sdk/lib-dynamodb");
 const dynamoDb = require('../config/dynamodb');
 
@@ -12,11 +12,8 @@ module.exports.handler = async (event) => {
 
     if (
       !data.bookingId ||
-      !data.checkInDate ||
-      !data.checkOutDate ||
       !data.roomTypes ||
-      !data.numberOfGuests ||
-      !data.originalCheckInDate
+      !data.numberOfGuests
     ) {
       console.error("Validation failed: Missing required fields");
       return {
@@ -25,8 +22,29 @@ module.exports.handler = async (event) => {
       };
     }
 
+    const getCommand = new GetCommand({
+      TableName: "HotelTable",
+      Key: {
+        PK: `Booking#${data.bookingId}`,
+        SK: data.originalCheckInDate,
+      },
+    });
+
+    const existingBookingResponse = await dynamoDb.send(getCommand);
+    const existingBooking = existingBookingResponse.Item;
+
+    if (!existingBooking) {
+      console.error("Booking not found");
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ message: "Booking not found" }),
+      };
+    }
+
+    const { startDate, endDate } = existingBooking;
+
     const totalCapacity = data.roomTypes.reduce((sum, room) => {
-      const roomType = room.type || room.type;
+      const roomType = room.type.toLowerCase();
       if (roomType === "single") return sum + room.count * 1;
       if (roomType === "double") return sum + room.count * 2;
       if (roomType === "suite") return sum + room.count * 3;
@@ -45,7 +63,7 @@ module.exports.handler = async (event) => {
       };
     }
 
-    const rooms = await getRoomObjects(data.checkInDate, data.checkOutDate);
+    const rooms = await getRoomObjects(startDate, endDate);
     console.log("Rooms fetched:", rooms);
 
     const isAvailable = checkAvailability(rooms, data.roomTypes);
@@ -57,26 +75,9 @@ module.exports.handler = async (event) => {
       };
     }
 
-    const bookingKey = {
-      PK: `Booking#${data.bookingId}`,
-      SK: data.originalCheckInDate,
-    };
-    console.log("Booking Key:", bookingKey);
-
-    await dynamoDb.send(
-      new DeleteCommand({
-        TableName: "HotelTable",
-        Key: bookingKey,
-      })
-    );
-
-    const newItem = {
-      PK: `Booking#${data.bookingId}`,
-      SK: data.checkInDate,
-      bookingID: data.bookingId,
-      name: data.guestName,
-      startDate: data.checkInDate,
-      endDate: data.checkOutDate,
+    const updatedItem = {
+      ...existingBooking,
+      name: data.guestName || existingBooking.name,
       rooms: data.roomTypes,
       numberOfGuests: data.numberOfGuests,
     };
@@ -84,7 +85,7 @@ module.exports.handler = async (event) => {
     await dynamoDb.send(
       new PutCommand({
         TableName: "HotelTable",
-        Item: newItem,
+        Item: updatedItem,
       })
     );
 
@@ -94,7 +95,7 @@ module.exports.handler = async (event) => {
       body: JSON.stringify({
         status: "success",
         message: "Booking successfully updated",
-        updatedBooking: newItem,
+        updatedBooking: updatedItem,
       }),
     };
   } catch (error) {
@@ -111,9 +112,9 @@ module.exports.handler = async (event) => {
 
 function checkAvailability(rooms, requestedRoomTypes) {
   for (const requested of requestedRoomTypes) {
-    const requestedType = requested.type || requested.type;
+    const requestedType = requested.type.toLowerCase();
     const room = rooms.find((r) =>
-      r.rooms.some((roomType) => (roomType.type || roomType.type) === requestedType)
+      r.rooms.some((roomType) => roomType.type.toLowerCase() === requestedType)
     );
 
     if (!room) {
@@ -122,7 +123,7 @@ function checkAvailability(rooms, requestedRoomTypes) {
     }
 
     const availableRoom = room.rooms.find(
-      (roomType) => (roomType.type || roomType.type) === requestedType
+      (roomType) => roomType.type.toLowerCase() === requestedType
     );
     if (availableRoom.Availability < requested.count) {
       console.warn(
@@ -134,5 +135,3 @@ function checkAvailability(rooms, requestedRoomTypes) {
 
   return true;
 }
-
-
