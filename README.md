@@ -100,9 +100,9 @@ POST /book-rooms
 #### Example Response
 ```plaintext
 {
-    "bookingnr": "1c046e8d-7890-4bc9-a246-0342028f9c57",
-    "guest": 2,
-    "rooms": [
+    "bookingNumber": "1c046e8d-7890-4bc9-a246-0342028f9c57",
+    "numberOfGuests": 2,
+    "numberOfRooms": [
         {
             "type": "single",
             "quantity": 1,
@@ -116,7 +116,7 @@ POST /book-rooms
     ],
     "checkInDate": "2024-12-30",
     "checkOutDate": "2024-12-31",
-    "name": "Jäns",
+    "bookerName": "Jäns",
     "totalPrice": 1500
 }
 ```
