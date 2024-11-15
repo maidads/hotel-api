@@ -31,19 +31,19 @@ GET /search-rooms?guests=2&startDate=2024-11-01&endDate=2024-11-02
 #### Example Response
 ```plaintext
 { 
-    "Single": {
+    "single": {
         "beds": 1,
-        "pricePerNight": 1000,
+        "pricePerNight": 500,
         "availability": 1
     },
-    "Double": {
+    "double": {
         "beds": 2,
-        "pricePerNight": 1500,
+        "pricePerNight": 1000,
         "availability": 10
     },
-    "Suit": {
+    "suit": {
         "beds": 2,
-        "pricePerNight": 1800,
+        "pricePerNight": 1500,
         "availability": 3
     }
 }
