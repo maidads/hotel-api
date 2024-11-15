@@ -175,11 +175,9 @@ GET /retrive-bookings?name=Alice Johnson
 |-----------------------|---------|-------------------------------------------------------|
 | `bookingId`           | String  | The unique ID of the booking                          |
 | `guestName`           | String  | Guest's name                                          |
-| `originalCheckInDate` | String  | The original check-in date of the booking (yyyy-mm-dd)|
-| `checkInDate`         | String  | New check-in date (yyyy-mm-dd)                        |
-| `checkOutDate`        | String  | New check-out date (yyyy-mm-dd)                       |
 | `roomTypes`           | Array   | Array of room type objects to update                  |
 | `numberOfGuests`      | Integer | Total number of guests                                |
+| `originalCheckInDate` | String  | The original check-in date of the booking (yyyy-mm-dd)|
 
 Room Type Object Structure
 | Field                 | Type    | Description                                           |
@@ -194,8 +192,6 @@ Room Type Object Structure
   "bookingId": "015",
   "guestName": "Alice",
   "originalCheckInDate": "2024-12-02",
-  "checkInDate": "2024-12-02",
-  "checkOutDate": "2024-12-06",
   "roomTypes": [ { "type": "Double", "count": 1 } ],
   "numberOfGuests": 2
 }
@@ -205,22 +201,17 @@ Room Type Object Structure
 ```plaintext
 {
   "status": "success",
-    "message": "Booking successfully updated",
-    "updatedBooking": {
-        "PK": "Booking#015",
-        "SK": "2024-12-02",
-        "BookingID": "015",
-        "Name": "Alice",
-        "StartDate": "2024-12-02",
-        "EndDate": "2024-12-06",
-        "Rooms": [
-            {
-                "type": "Double",
-                "count": 1
-            }
-        ],
-        "NumberOfGuests": 2
-    }
+  "message": "Booking successfully updated",
+  "updatedBooking": {
+    "PK": "Booking#015",
+    "SK": "2024-12-02",
+    "bookingID": "015",
+    "name": "Alice",
+    "startDate": "2024-12-02",
+    "endDate": "2024-12-04",
+    "rooms": [ { "type": "Double", "count": 1 } ],
+    "numberOfGuests": 2
+  }
 }
 ```
 
