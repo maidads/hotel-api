@@ -13,7 +13,7 @@ module.exports.handler = async (event, context) => {
         // If the days isn't present in db, it is nothing booked that day. Add info for unbooked rooms
         if (rooms.length === 0 ){
             let newRooms = {
-                Rooms: [
+                rooms: [
                     {"type": "single", "beds": 1, "price": 1000, "availability": 2, "bookings": [] },
                     { "type": "double", "beds": 2, "price": 1500, "availability": 15, "bookings": [] },
                     { "type": "suit", "beds": 2, "price": 1800, "availability": 3, "bookings": [] }

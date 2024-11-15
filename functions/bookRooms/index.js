@@ -141,9 +141,9 @@ const getBookingOBJ = (bookingData, room) => {
     bookingData.rooms.forEach(type => {
 
         const bookedType = {
-            type: type.type,
+            type: type.type.toLowerCase(),
             quantity: type.quantity,
-            price: prices[type.type]
+            price: prices[type.type.toLowerCase()]
         }
         bookedRooms.push(bookedType);
     })
