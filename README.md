@@ -79,7 +79,7 @@ Error: If not enough room for guests you get a error specifing not enough rooms 
 POST /book-rooms
 ```
 
-#### Example object
+#### Example request object
 ```plaintext
 {
     "name": "Jöns",
@@ -181,7 +181,7 @@ PUT /booking/ID12345
 | Parameter  | Type    | Description                      |
 |------------|---------|----------------------------------|
 | `id`       | String  | Booking ID to cancel             |
-| `date`     | String  | Date of booking to cancel        |
+| `date`     | String  | Check-in date of booking to cancel        |
 
 #### Example Request
 ```plaintext
