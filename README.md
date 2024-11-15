@@ -244,7 +244,7 @@ DELETE /cancel-booking/d48c6.../2024-12-25
 ```plaintext
 {
   "message": "Booking canceled successfully",
-  "bookingId": "d48c6..."
+  "bookingNumber": "d48c6..."
 }
 ```
 
