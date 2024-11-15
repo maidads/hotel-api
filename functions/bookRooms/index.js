@@ -46,12 +46,12 @@ module.exports.handler = async (event, context) => {
         const total = getTotalPrice(bookingOBJ.rooms, nights)
 
         const bookingDetails = {
-            bookingnr: bookingOBJ.bookingID,
-            guest: bookingOBJ.numberOfGuests,
-            rooms: bookingOBJ.rooms,
+            bookingNumber: bookingOBJ.bookingID,
+            numberOfGuests: bookingOBJ.numberOfGuests,
+            numberOfRooms: bookingOBJ.rooms,
             checkInDate: bookingOBJ.startDate,
             checkOutDate: bookingOBJ.endDate,
-            name: bookingOBJ.name,
+            bookerName: bookingOBJ.name,
             totalPrice: total
         }
 
