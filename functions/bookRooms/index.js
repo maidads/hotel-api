@@ -8,6 +8,7 @@ const {getBodyJson} = require('../getBodyJson');
 const { generateDateRange} =require('../../utils/generateDateRange');
 const { createErrorResponse, createSuccessResponse } = require('../../utils/responses');
 const {createTransactionItemsForRooms} = require('../../utils/dynamodbHelpers');
+const { getRoomTypes } = require('../../utils/bookingHelpers');
 
 
 module.exports.handler = async (event, context) => {
@@ -118,12 +119,19 @@ const getNewRoomObjectForDate = (date) => {
     return newRoom = {
         "PK": "ROOMS",
         "SK": date,
-        "rooms": [
-            { "type": "single", "beds": 1, "price": 1000, "availability": 2, "bookings": [] },
-            { "type": "double", "beds": 2, "price": 1500, "availability": 15, "bookings": [] },
-            { "type": "suit", "beds": 3, "price": 1800, "availability": 3, "bookings": [] }
-        ]
+        "rooms": getRoomTypes()
     }
+
+
+    // return newRoom = {
+    //     "PK": "ROOMS",
+    //     "SK": date,
+    //     "rooms": [
+    //         { "type": "single", "beds": 1, "price": 1000, "availability": 2, "bookings": [] },
+    //         { "type": "double", "beds": 2, "price": 1500, "availability": 15, "bookings": [] },
+    //         { "type": "suit", "beds": 3, "price": 1800, "availability": 3, "bookings": [] }
+    //     ]
+    // }
 }
 
 const getBookingOBJ = (bookingData, room) => {
