@@ -121,17 +121,6 @@ const getNewRoomObjectForDate = (date) => {
         "SK": date,
         "rooms": getRoomTypes()
     }
-
-
-    // return newRoom = {
-    //     "PK": "ROOMS",
-    //     "SK": date,
-    //     "rooms": [
-    //         { "type": "single", "beds": 1, "price": 1000, "availability": 2, "bookings": [] },
-    //         { "type": "double", "beds": 2, "price": 1500, "availability": 15, "bookings": [] },
-    //         { "type": "suit", "beds": 3, "price": 1800, "availability": 3, "bookings": [] }
-    //     ]
-    // }
 }
 
 const getBookingOBJ = (bookingData, room) => {
