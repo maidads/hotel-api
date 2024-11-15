@@ -27,7 +27,7 @@ module.exports.validateBookingData = (data) => {
             return { valid: false, message: "Each room must have a type and a quantity" };
         }
 
-        if (validRoomTypes.includes(room.type)) {
+        if (validRoomTypes.includes(room.type.toLowerCase())) {
             hasValidRoom = true;
         }
 

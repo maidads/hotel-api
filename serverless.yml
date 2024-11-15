@@ -11,8 +11,6 @@ provider:
   region: eu-north-1
   role: ${ssm:/for-class/iam/role}
  
-
-
 package:
   exclude:
     - node_modules/**
@@ -24,8 +22,6 @@ package:
     - "README.md"
     - ".env"
     - .dynamodb/**
-
-
 
 resources:
   Resources:
@@ -73,22 +69,7 @@ functions:
     events:
       - http:
           path: modify-booking
-          method: POST
-          
-  hello:
-    handler: handler.hello
-    events:
-      - httpApi:
-          path: /
-          method: GET
-          
-  addItem:
-    handler: addItem.handler
-    events:
-      - httpApi:
-          path: /items
-          method: POST
-
+          method: PUT
 
   searchRooms:
     handler: functions/searchRooms/index.handler

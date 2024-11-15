@@ -33,8 +33,8 @@ module.exports.handler = async (event, context) => {
         body: JSON.stringify({ error: 'Booking not found' }),
       };
     }
-
-    const bookingDate = getResult.Item.StartDate.S;
+    console.log(getResult.Item)
+    const bookingDate = getResult.Item.startDate.S;
     const bookingDateObj = new Date(bookingDate);
     const currentDate = new Date();
 
@@ -48,18 +48,19 @@ module.exports.handler = async (event, context) => {
       };
     }
     const booking = unmarshall(getResult.Item)
-    const dateList = generateDateRange(bookingDate, booking.EndDate)
+    console.log(booking);
+    const dateList = generateDateRange(bookingDate, booking.endDate)
 
     const transactItems = getTransactItems(booking, dateList)
     const trasactParams = {
-        TransactItems: transactItems,
+      TransactItems: transactItems,
     };
     try {
- 
+
       await dynamoDb.send(new TransactWriteItemsCommand(trasactParams));
-     // return createSuccessResponse(`Booking ${bookingId} canceled successfully`)
-     return createSuccessResponse({message: `Booking canceled successfully`, bookingId: bookingId})
-   
+      // return createSuccessResponse(`Booking ${bookingId} canceled successfully`)
+      return createSuccessResponse({ message: `Booking canceled successfully`, bookingId: bookingId })
+
     } catch (error) {
       console.log(error)
       return createErrorResponse(`Failed to delete ${bookingId}`)
@@ -85,7 +86,7 @@ const getTransactItems = (bookingData, dates) => {
       TableName: "HotelTable",
       Key: {
         PK: { S: `Booking#${bookingData.BookingID}` },
-        SK: { S: bookingData.StartDate }
+        SK: { S: bookingData.startDate }
       }
     }
   });
@@ -95,12 +96,12 @@ const getTransactItems = (bookingData, dates) => {
 
 function createBookingDataForDates(bookingData, dates) {
   return dates.map(date => ({
-      date: date,
-      rooms: bookingData.Rooms.map(room => ({
-          price: room.Price,
-          quantity: room.Quantity,
-          type: room.Type
-      }))
+    date: date,
+    rooms: bookingData.rooms.map(room => ({
+      price: room.price,
+      quantity: room.quantity,
+      type: room.type
+    }))
   }));
 }
 

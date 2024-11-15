@@ -3,11 +3,12 @@ const dynamoDb = require('../../config/dynamodb');
 const { TransactWriteItemsCommand, BatchWriteItemCommand, PutItemCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
 const { getRoomObjects } = require('../getRoomObjects');
 const crypto = require('crypto');
-const {validateBookingData} = require('../validateBookingData');
-const {getBodyJson} = require('../getBodyJson');
-const { generateDateRange} =require('../../utils/generateDateRange');
+const { validateBookingData } = require('../validateBookingData');
+const { getBodyJson } = require('../getBodyJson');
+const { generateDateRange } = require('../../utils/generateDateRange');
 const { createErrorResponse, createSuccessResponse } = require('../../utils/responses');
-const {createTransactionItemsForRooms} = require('../../utils/dynamodbHelpers');
+const { createTransactionItemsForRooms } = require('../../utils/dynamodbHelpers');
+const { getRoomTypes } = require('../../utils/bookingHelpers');
 
 
 module.exports.handler = async (event, context) => {
@@ -18,7 +19,7 @@ module.exports.handler = async (event, context) => {
         return createErrorResponse(bookingData.error, 400)
     }
     const validData = validateBookingData(bookingData);
-    if (!validData.valid){
+    if (!validData.valid) {
         return createErrorResponse(validData.message, 400)
     }
     const rooms = await getRoomObjects(bookingData.startDate, bookingData.endDate);
@@ -41,16 +42,16 @@ module.exports.handler = async (event, context) => {
         return createErrorResponse("Not enough rooms available.", 400)
 
     } else {
-        const nights = dateList.length-1
-        const total = getTotalPrice(bookingOBJ.Rooms, nights) 
+        const nights = dateList.length - 1
+        const total = getTotalPrice(bookingOBJ.rooms, nights)
 
         const bookingDetails = {
-            bookingnr: bookingOBJ.BookingID,
-            guest: bookingOBJ.NumberOfGuests,
-            rooms: bookingOBJ.Rooms,
-            checkInDate: bookingOBJ.StartDate,
-            checkOutDate: bookingOBJ.EndDate,
-            name: bookingOBJ.Name,
+            bookingnr: bookingOBJ.bookingID,
+            guest: bookingOBJ.numberOfGuests,
+            rooms: bookingOBJ.rooms,
+            checkInDate: bookingOBJ.startDate,
+            checkOutDate: bookingOBJ.endDate,
+            name: bookingOBJ.name,
             totalPrice: total
         }
 
@@ -118,32 +119,28 @@ const getNewRoomObjectForDate = (date) => {
     return newRoom = {
         "PK": "ROOMS",
         "SK": date,
-        "Rooms": [
-            { "Type": "Single", "Beds": 1, "Price": 1000, "Availability": 2, "Bookings": [] },
-            { "Type": "Double", "Beds": 2, "Price": 1500, "Availability": 15, "Bookings": [] },
-            { "Type": "Suit", "Beds": 3, "Price": 1800, "Availability": 3, "Bookings": [] }
-        ]
+        "rooms": getRoomTypes()
     }
 }
 
 const getBookingOBJ = (bookingData, room) => {
 
-    if (room === undefined){
+    if (room === undefined) {
         room = getNewRoomObjectForDate("dosent matter")// just to get the room types
     }
     var prices = {
     }
-    room.Rooms.forEach(type => {
-        prices[type.Type.toLowerCase()] = type.Price
+    room.rooms.forEach(type => {
+        prices[type.type.toLowerCase()] = type.price
     })
 
     const bookedRooms = []
     bookingData.rooms.forEach(type => {
 
         const bookedType = {
-            Type: capitalize(type.type),
-            Quantity: type.quantity,
-            Price: prices[type.type]
+            type: type.type.toLowerCase(),
+            quantity: type.quantity,
+            price: prices[type.type.toLowerCase()]
         }
         bookedRooms.push(bookedType);
     })
@@ -151,20 +148,16 @@ const getBookingOBJ = (bookingData, room) => {
     const bookingOBJ = {
         "PK": `Booking#${id}`,
         "SK": bookingData.startDate,
-        BookingID: id,
-        Name: bookingData.name,
-        Email: bookingData.email,
-        NumberOfGuests: bookingData.guests,
-        StartDate: bookingData.startDate,
-        EndDate: bookingData.endDate,
-        Rooms: bookedRooms
+        bookingID: id,
+        name: bookingData.name,
+        email: bookingData.email,
+        numberOfGuests: bookingData.guests,
+        startDate: bookingData.startDate,
+        endDate: bookingData.endDate,
+        rooms: bookedRooms
     }
     return bookingOBJ;
 
-}
-function capitalize(str) {
-
-    return str[0].toUpperCase() + str.slice(1).toLowerCase();
 }
 
 const getPutParamsForBooking = (bookingOBJ) => {
@@ -180,7 +173,7 @@ const getPutParamsForBooking = (bookingOBJ) => {
 const getTotalPrice = (rooms, nights) => {
     var total = 0
     rooms.forEach(room => {
-        total += (room.Quantity * room.Price)
+        total += (room.quantity * room.price)
     })
     return (total * nights)
 }
